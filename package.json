@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc index --target ES2019 --module commonjs --outDir build && cd build && node ."
+    "build": "tsc index --target ES2019 --module commonjs --outDir build",
+    "start": "npm run build && node ."
   },
   "keywords": [],
   "author": "",
