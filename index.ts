@@ -165,14 +165,14 @@ async function massuser(message: GatewayMessageCreateDispatchData, args: string[
 
   const ids = new Map(input.match(snowflakeRegex)?.map(key => [key, "🔍 Loading..."]));
   if (!ids.size) return api.createMessage(message.channel_id, { content: "No IDs found" });
-  if (ids.size > 200) return api.createMessage(message.channel_id, { content: "Cannot lookup more than 200 users" });
+  if (ids.size > 1000) return api.createMessage(message.channel_id, { content: "Cannot lookup more than 1000 users" });
   const pending = await api.createMessage(message.channel_id, { content: "🔍 Loading..." });
 
   for await (const id of ids.keys()) {
     await api
       .getUser(id)
       .then(({ username, discriminator }) => username + "#" + discriminator)
-      .catch(() => "⛔ Invalid User")
+      .catch(() => "⚠ Invalid User")
       .then(value => ids.set(id, value));
 
     let completed = 0;
@@ -183,20 +183,44 @@ async function massuser(message: GatewayMessageCreateDispatchData, args: string[
     });
 
     const percent = Math.round((completed / ids.size) * 25);
-    if (!performance || completed === ids.size)
+    if (!performance || completed === ids.size) {
+      let components = [];
+      if (description.length > 4000) {
+        if (completed === ids.size) {
+          const url = await haste(description);
+          components = [
+            {
+              type: 1,
+              components: [
+                {
+                  url,
+                  type: 2,
+                  style: 5,
+                  label: "Haste"
+                }
+              ]
+            }
+          ];
+        }
+
+        description = description.slice(0, 4000);
+      }
+
       await api.editMessage(pending.channel_id, pending.id, {
+        components,
         content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(25 - percent) + "] ",
         embeds: [
           {
             color,
+            description,
             title:
               completed === ids.size
                 ? "✅ Looked up **" + ids.size + "** users"
-                : "🔍 Looking up **" + ids.size + "** users",
-            description
+                : "🔍 Looking up **" + ids.size + "** users"
           }
         ]
       });
+    }
   }
 }
 
@@ -213,7 +237,7 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
 
   const ids = new Map(input.match(snowflakeRegex)?.map(key => [key, "🔍 Loading..."]));
   if (!ids.size) return api.createMessage(message.channel_id, { content: "No IDs found" });
-  if (ids.size > 200) return api.createMessage(message.channel_id, { content: "Cannot lookup more than 200 guilds" });
+  if (ids.size > 1000) return api.createMessage(message.channel_id, { content: "Cannot lookup more than 1000 guilds" });
   const pending = await api.createMessage(message.channel_id, { content: "🔍 Loading..." });
 
   for await (const id of ids.keys()) {
@@ -231,21 +255,53 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
     });
 
     const percent = Math.round((completed / ids.size) * 25);
-    if (!performance || completed === ids.size)
+    if (!performance || completed === ids.size) {
+      let components = [];
+      if (description.length > 4000) {
+        if (completed === ids.size) {
+          const url = await haste(description);
+          components = [
+            {
+              type: 1,
+              components: [
+                {
+                  url,
+                  type: 2,
+                  style: 5,
+                  label: "Haste"
+                }
+              ]
+            }
+          ];
+        }
+
+        description = description.slice(0, 4000);
+      }
+
       await api.editMessage(pending.channel_id, pending.id, {
+        components,
         content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(25 - percent) + "] ",
         embeds: [
           {
             color,
+            description,
             title:
               completed === ids.size
                 ? "✅ Looked up **" + ids.size + "** guilds"
-                : "🔍 Looking up **" + ids.size + "** guilds",
-            description
+                : "🔍 Looking up **" + ids.size + "** guilds"
           }
         ]
       });
+    }
   }
+}
+
+function haste(text: string) {
+  return robert
+    .post("https://commandtechno.com/paste/upload")
+    .text(text)
+    .send("text")
+    .then(id => "https://commandtechno.com/paste/" + id);
 }
 
 (async () => {
