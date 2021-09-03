@@ -94,7 +94,9 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
         if (config.owners.includes(d.author.id)) {
           try {
             const res = eval(args.join(" "));
-            api.createMessage(d.channel_id, { embeds: [{ description: "```js\n" + res.slice(0, 4000) + "```" }] });
+            api.createMessage(d.channel_id, {
+              embeds: [{ description: "```js\n" + String(res).slice(0, 4000) + "```" }]
+            });
           } catch (e) {
             api.createMessage(d.channel_id, { content: e?.message ?? e ?? "⚠ Unknown Error" });
           }
@@ -105,7 +107,7 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
           try {
             const res = execSync(args.join(" "), { timeout: 10000 });
             api.createMessage(d.channel_id, {
-              embeds: [{ description: "```js\n" + inspect(res, { depth: 1 }) + "```" }]
+              embeds: [{ description: "```js\n" + inspect(res.toString(), { depth: 1 }) + "```" }]
             });
           } catch (e) {
             api.createMessage(d.channel_id, { content: e?.message ?? e ?? "⚠ Unknown Error" });
