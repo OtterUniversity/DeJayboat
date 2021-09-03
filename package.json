@@ -1,0 +1,19 @@
+{
+  "name": "dejayboat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc index --target ES2019 --module commonjs --outDir build && cd build && node ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
+    "detritus-client-socket": "^0.8.2",
+    "discord-api-types": "^0.22.0",
+    "ottercord": "^1.0.8",
+    "robert": "^2.0.6"
+  }
+}
