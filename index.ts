@@ -117,7 +117,7 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
       case "update":
         if (config.owners.includes(d.author.id)) {
           execSync("git pull");
-          execSync("pm2 restart " + process.pid);
+          process.exit();
         }
         break;
     }
