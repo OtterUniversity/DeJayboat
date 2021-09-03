@@ -96,13 +96,13 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
       case "ping":
         const gatewayMessage = await api.createMessage(d.channel_id, { content: "Pinging gateway..." });
         const gatewayPing = await ws.ping();
-        api.editMessage(d.channel_id, gatewayMessage.id, { content: "🕓 " + gatewayPing + "ms" });
+        api.editMessage(d.channel_id, gatewayMessage.id, { content: "🕓 **" + gatewayPing + "ms** Gateway" });
 
-        const restMessage = await api.createMessage(d.channel_id, { content: "Pinging gateway..." });
+        const restMessage = await api.createMessage(d.channel_id, { content: "Pinging Rest..." });
         const restStart = Date.now();
         await api.getCurrentUser();
         const restPing = Date.now() - restStart;
-        api.editMessage(d.channel_id, restMessage.id, { content: "🕓 " + restPing + "ms" });
+        api.editMessage(d.channel_id, restMessage.id, { content: "🕓 **" + restPing + "ms** Rest" });
         break;
       case "eval":
         if (config.owners.includes(d.author.id)) {
