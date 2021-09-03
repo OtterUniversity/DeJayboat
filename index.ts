@@ -179,7 +179,7 @@ async function massuser(message: GatewayMessageCreateDispatchData, args: string[
     let description = "";
     ids.forEach((value, key) => {
       if (value !== "🔍 Loading...") completed++;
-      description += "`" + key + "` " + value + "\n";
+      description += "<@" + key + "> " + value + "\n";
     });
 
     const percent = Math.round((completed / ids.size) * 25);
