@@ -154,7 +154,7 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
 
 async function massuser(message: GatewayMessageCreateDispatchData, args: string[]) {
   let input = args.join(" ");
-  let performance = args.some(arg => arg === "-f" || arg === "--fast");
+  let performance = args.includes("-f") || args.includes("--fast");
   if (!input) {
     const [attachment] = message.attachments;
     if (!attachment?.content_type.endsWith("charset=utf-8"))
@@ -226,7 +226,7 @@ async function massuser(message: GatewayMessageCreateDispatchData, args: string[
 
 async function massguild(message: GatewayMessageCreateDispatchData, args: string[]) {
   let input = args.join(" ");
-  let performance = args.some(arg => arg === "-f" || arg === "--fast");
+  let performance = args.includes("-f") || args.includes("--fast");
   if (!input) {
     const [attachment] = message.attachments;
     if (!attachment?.content_type.endsWith("charset=utf-8"))
