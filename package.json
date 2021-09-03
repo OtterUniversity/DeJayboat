@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc index --target ES2019 --module commonjs --outDir build",
-    "start": "npm run build && node ."
+    "start": "npm run build && cd build && node ."
   },
   "keywords": [],
   "author": "",
