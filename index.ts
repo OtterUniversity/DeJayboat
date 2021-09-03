@@ -17,6 +17,9 @@ const zendesk = robert
   .query("per_page", 99)
   .format("json");
 
+const snowflakeRegex = /\b\d{17,19}\b/g;
+const color = parseInt("36393f", 16);
+
 ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchData }) => {
   if (t === "MESSAGE_CREATE") {
     if (d.channel_id === config.datamining) {
@@ -90,12 +93,28 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
       case "massguild":
         massguild(d, args);
         break;
+      case "ping":
+        const gatewayMessage = await api.createMessage(d.channel_id, { content: "Pinging gateway..." });
+        const gatewayPing = await ws.ping();
+        api.editMessage(d.channel_id, gatewayMessage.id, { content: "🕓 " + gatewayPing + "ms" });
+
+        const restMessage = await api.createMessage(d.channel_id, { content: "Pinging gateway..." });
+        const restStart = Date.now();
+        await api.getCurrentUser();
+        const restPing = Date.now() - restStart;
+        api.editMessage(d.channel_id, restMessage.id, { content: "🕓 " + restPing + "ms" });
+        break;
       case "eval":
         if (config.owners.includes(d.author.id)) {
           try {
             const res = eval(args.join(" "));
             api.createMessage(d.channel_id, {
-              embeds: [{ description: "```js\n" + inspect(res, { depth: 1 }).toString().trim() + "```" }]
+              embeds: [
+                {
+                  color,
+                  description: "```js\n" + inspect(res, { depth: 1 }).toString().trim() + "```"
+                }
+              ]
             });
           } catch (e) {
             api.createMessage(d.channel_id, { content: e?.message ?? e ?? "⚠ Unknown Error" });
@@ -107,7 +126,12 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
           try {
             const res = execSync(args.join(" "), { timeout: 10000 });
             api.createMessage(d.channel_id, {
-              embeds: [{ description: "```js\n" + res.toString().slice(0, 4000) + "```" }]
+              embeds: [
+                {
+                  color,
+                  description: "```js\n" + res.toString().slice(0, 4000) + "```"
+                }
+              ]
             });
           } catch (e) {
             api.createMessage(d.channel_id, { content: e?.message ?? e ?? "⚠ Unknown Error" });
@@ -124,9 +148,6 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
     }
   }
 });
-
-const snowflakeRegex = /\b\d{17,19}\b/g;
-const color = parseInt("36393f", 16);
 
 async function massuser(message: GatewayMessageCreateDispatchData, args: string[]) {
   let input = args.join(" ");
