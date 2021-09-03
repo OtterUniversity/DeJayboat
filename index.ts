@@ -140,8 +140,11 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
         break;
       case "update":
         if (config.owners.includes(d.author.id)) {
+          const updateMessage = await api.createMessage(d.channel_id, { content: "Pulling from GitHub" });
           execSync("git pull");
+          await api.editMessage(d.channel_id, updateMessage.id, { content: "Compiling typescript" });
           execSync("npm run build");
+          await api.editMessage(d.channel_id, updateMessage.id, { content: "👋 Exiting process" });
           process.exit();
         }
         break;
@@ -151,6 +154,7 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
 
 async function massuser(message: GatewayMessageCreateDispatchData, args: string[]) {
   let input = args.join(" ");
+  let performance = args.some(arg => arg === "-f" || arg === "--fast");
   if (!input) {
     const [attachment] = message.attachments;
     if (!attachment?.content_type.endsWith("charset=utf-8"))
@@ -168,7 +172,7 @@ async function massuser(message: GatewayMessageCreateDispatchData, args: string[
     await api
       .getUser(id)
       .then(({ username, discriminator }) => username + "#" + discriminator)
-      .catch(() => "⛔ Deleted User")
+      .catch(() => "⛔ Invalid User")
       .then(value => ids.set(id, value));
 
     let completed = 0;
@@ -179,24 +183,26 @@ async function massuser(message: GatewayMessageCreateDispatchData, args: string[
     });
 
     const percent = Math.round((completed / ids.size) * 25);
-    await api.editMessage(pending.channel_id, pending.id, {
-      content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(25 - percent) + "] ",
-      embeds: [
-        {
-          color,
-          title:
-            completed === ids.size
-              ? "✅ Looked up **" + ids.size + "** users"
-              : "🔍 Looking up **" + ids.size + "** users",
-          description
-        }
-      ]
-    });
+    if (!performance || completed === ids.size)
+      await api.editMessage(pending.channel_id, pending.id, {
+        content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(25 - percent) + "] ",
+        embeds: [
+          {
+            color,
+            title:
+              completed === ids.size
+                ? "✅ Looked up **" + ids.size + "** users"
+                : "🔍 Looking up **" + ids.size + "** users",
+            description
+          }
+        ]
+      });
   }
 }
 
 async function massguild(message: GatewayMessageCreateDispatchData, args: string[]) {
   let input = args.join(" ");
+  let performance = args.some(arg => arg === "-f" || arg === "--fast");
   if (!input) {
     const [attachment] = message.attachments;
     if (!attachment?.content_type.endsWith("charset=utf-8"))
@@ -225,19 +231,20 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
     });
 
     const percent = Math.round((completed / ids.size) * 25);
-    await api.editMessage(pending.channel_id, pending.id, {
-      content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(25 - percent) + "] ",
-      embeds: [
-        {
-          color,
-          title:
-            completed === ids.size
-              ? "✅ Looked up **" + ids.size + "** guilds"
-              : "🔍 Looking up **" + ids.size + "** guilds",
-          description
-        }
-      ]
-    });
+    if (!performance || completed === ids.size)
+      await api.editMessage(pending.channel_id, pending.id, {
+        content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(25 - percent) + "] ",
+        embeds: [
+          {
+            color,
+            title:
+              completed === ids.size
+                ? "✅ Looked up **" + ids.size + "** guilds"
+                : "🔍 Looking up **" + ids.size + "** guilds",
+            description
+          }
+        ]
+      });
   }
 }
 
