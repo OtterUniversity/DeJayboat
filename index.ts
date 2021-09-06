@@ -7,6 +7,7 @@ import { execSync } from "child_process";
 import { inspect } from "util";
 import { load } from "cheerio";
 import robert from "robert";
+import { writeFileSync } from "fs";
 
 const ws = new Gateway.Socket(config.token);
 const api = ottercord(config.token);
@@ -19,6 +20,18 @@ const zendesk = robert
 
 const snowflakeRegex = /\b\d{17,19}\b/g;
 const color = parseInt("36393f", 16);
+
+ws.on("ready", () => {
+  let last;
+  try {
+    last = require("./last.json");
+  } catch {
+    return;
+  }
+
+  if (Date.now() - last.time > 60000) return;
+  api.editMessage(last.channel, last.message, { content: "🟢 Online" });
+});
 
 ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchData }) => {
   if (t === "MESSAGE_CREATE") {
@@ -156,7 +169,16 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
           execSync("git pull");
           await api.editMessage(d.channel_id, updateMessage.id, { content: "Compiling typescript" });
           execSync("npm run build");
-          await api.editMessage(d.channel_id, updateMessage.id, { content: "👋 Exiting process" });
+          await api.editMessage(d.channel_id, updateMessage.id, { content: "Exiting process" });
+          writeFileSync(
+            "last.json",
+            JSON.stringify({
+              channel: d.channel_id,
+              message: updateMessage.id,
+              time: Date.now()
+            })
+          );
+
           process.exit();
         }
         break;
