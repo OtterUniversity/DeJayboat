@@ -107,7 +107,19 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
       case "eval":
         if (config.owners.includes(d.author.id)) {
           try {
-            const res = eval(args.join(" "));
+            let res = eval(args.join(" "));
+            if (res instanceof Promise) {
+              api.createMessage(d.channel_id, {
+                content: "<a:crumbdance:877043850890317855> Resolving Promise"
+              });
+
+              try {
+                res = await res;
+              } catch (e) {
+                return api.createMessage(d.channel_id, { content: e?.message ?? e ?? "⚠ Unknown Error" });
+              }
+            }
+
             api.createMessage(d.channel_id, {
               embeds: [
                 {
