@@ -1,12 +1,12 @@
 import * as config from "./config.js";
 import * as ottercord from "ottercord";
+import * as robert from "robert";
 
 import { Gateway } from "detritus-client-socket";
 import { GatewayMessageCreateDispatchData } from "discord-api-types/v9";
 import { execSync } from "child_process";
 import { inspect } from "util";
 import { load } from "cheerio";
-import robert from "robert";
 import { writeFileSync } from "fs";
 
 const ws = new Gateway.Socket(config.token);
@@ -110,7 +110,6 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
         const gatewayMessage = await api.createMessage(d.channel_id, { content: "Pinging gateway..." });
         const gatewayPing = await ws.ping();
         api.editMessage(d.channel_id, gatewayMessage.id, { content: "🕓 **" + gatewayPing + "ms** Gateway" });
-
         const restMessage = await api.createMessage(d.channel_id, { content: "Pinging Rest..." });
         const restStart = Date.now();
         await api.getCurrentUser();
@@ -167,6 +166,8 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
         if (config.owners.includes(d.author.id)) {
           const updateMessage = await api.createMessage(d.channel_id, { content: "Pulling from GitHub" });
           execSync("git pull");
+          await api.editMessage(d.channel_id, updateMessage.id, { content: "Installing dependencies" });
+          execSync("npm install");
           await api.editMessage(d.channel_id, updateMessage.id, { content: "Compiling typescript" });
           execSync("npm run build");
           await api.editMessage(d.channel_id, updateMessage.id, { content: "Exiting process" });
@@ -206,7 +207,7 @@ async function massuser(message: GatewayMessageCreateDispatchData, args: string[
     await api
       .getUser(id)
       .then(({ username, discriminator }) => username + "#" + discriminator)
-      .catch(() => "⚠ Invalid User")
+      .catch(() => "⛔ Invalid User")
       .then(value => ids.set(id, value));
 
     let completed = 0;
@@ -278,7 +279,12 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
     await api
       .getGuildPreview(id)
       .then(({ name }) => name)
-      .catch(() => "🔒 Private")
+      .catch(() =>
+        api
+          .getGuildWidget(id)
+          .then(({ name }) => name)
+          .catch(({ status }) => (status === 403 ? "🔒 Private" : "⛔ Invalid Guild"))
+      )
       .then(value => ids.set(id, value));
 
     let completed = 0;
