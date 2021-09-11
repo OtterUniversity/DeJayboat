@@ -47,7 +47,7 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
             validImage = true;
           } catch {}
 
-          if (validImage) {
+          if (validImage)
             await robert
               .get(image)
               .send("buffer")
@@ -58,7 +58,6 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
                 })
               )
               .catch(() => {});
-          }
         }
 
         if (files.length) api.createMessage(d.channel_id, {}, files);
@@ -75,12 +74,11 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
           validSvg = true;
         } catch {}
 
-        if (validSvg) {
-          const url = new URL("https://svg.bruhmomentlol.repl.co");
-          url.searchParams.set("q", svg);
-
+        if (validSvg)
           await robert
-            .get(url.toString())
+            .get("https://util.bruhmomentlol.repl.co/svg")
+            .query("q", svg)
+            .query("width", 400)
             .send("buffer")
             .then(value =>
               files.push({
@@ -89,7 +87,6 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
               })
             )
             .catch(() => {});
-        }
       }
 
       if (files.length) api.createMessage(d.channel_id, {}, files);
