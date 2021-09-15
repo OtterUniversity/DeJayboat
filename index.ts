@@ -18,6 +18,7 @@ const zendesk = robert
   .query("per_page", 99)
   .format("json");
 
+const exactSnowflakeRegex = /^\d{17,19}$/;
 const snowflakeRegex = /\b\d{17,19}\b/g;
 const color = parseInt("36393f", 16);
 
@@ -358,7 +359,7 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
 function set(message: GatewayMessageCreateDispatchData, args: string[]) {
   const id = args.shift();
   const name = args.join(" ");
-  if (!snowflakeRegex.test(id)) return api.createMessage(message.channel_id, { content: "Invalid snowflake" });
+  if (!exactSnowflakeRegex.test(id)) return api.createMessage(message.channel_id, { content: "Invalid snowflake" });
   if (!name) return api.createMessage(message.channel_id, { content: "No name specified" });
   guilds[id] = name;
 
@@ -371,7 +372,7 @@ function set(message: GatewayMessageCreateDispatchData, args: string[]) {
 
 function del(message: GatewayMessageCreateDispatchData, args: string[]) {
   const id = args.shift();
-  if (!snowflakeRegex.test(id)) return api.createMessage(message.channel_id, { content: "Invalid snowflake" });
+  if (!exactSnowflakeRegex.test(id)) return api.createMessage(message.channel_id, { content: "Invalid snowflake" });
   delete guilds[id];
 
   writeFileSync("guilds.json", JSON.stringify(guilds));
