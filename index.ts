@@ -21,16 +21,23 @@ const zendesk = robert
 const snowflakeRegex = /\b\d{17,19}\b/g;
 const color = parseInt("36393f", 16);
 
+let guilds = {};
+try {
+  guilds = require("./guilds.json");
+} catch {
+  writeFileSync("guilds.json", JSON.stringify({}));
+}
+
 ws.on("ready", () => {
-  let last;
+  let shutdown;
   try {
-    last = require("./last.json");
+    shutdown = require("./shutdown.json");
   } catch {
     return;
   }
 
-  if (Date.now() - last.time > 60000) return;
-  api.editMessage(last.channel, last.message, { content: "🟢 Online" });
+  if (Date.now() - shutdown.time > 60000) return;
+  api.editMessage(shutdown.channel, shutdown.message, { content: "🟢 Online" });
 });
 
 ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchData }) => {
@@ -103,15 +110,26 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
       case "massguild":
         massguild(d, args);
         break;
+      case "set":
+        set(d, args);
+        break;
+      case "delete":
+      case "del":
+        del(d, args);
+        break;
       case "ping":
-        const gatewayMessage = await api.createMessage(d.channel_id, { content: "Pinging gateway..." });
+        const pingMessage = await api.createMessage(d.channel_id, { content: "Pinging gateway..." });
         const gatewayPing = await ws.ping();
-        api.editMessage(d.channel_id, gatewayMessage.id, { content: "🕓 **" + gatewayPing + "ms** Gateway" });
-        const restMessage = await api.createMessage(d.channel_id, { content: "Pinging Rest..." });
+        api.editMessage(d.channel_id, pingMessage.id, {
+          content: "🕓 **" + gatewayPing + "ms** Gateway\nPinging rest..."
+        });
+
         const restStart = Date.now();
         await api.getCurrentUser();
         const restPing = Date.now() - restStart;
-        api.editMessage(d.channel_id, restMessage.id, { content: "🕓 **" + restPing + "ms** Rest" });
+        api.editMessage(d.channel_id, pingMessage.id, {
+          content: "🕓 **" + gatewayPing + "ms** Gateway\n🕓 **" + restPing + "ms** Rest"
+        });
         break;
       case "eval":
         if (config.owners.includes(d.author.id)) {
@@ -169,7 +187,7 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
           execSync("npm run build");
           await api.editMessage(d.channel_id, updateMessage.id, { content: "Exiting process" });
           writeFileSync(
-            "last.json",
+            "shutdown.json",
             JSON.stringify({
               channel: d.channel_id,
               message: updateMessage.id,
@@ -280,7 +298,9 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
         api
           .getGuildWidget(id)
           .then(({ name }) => name)
-          .catch(({ status }) => (status === 403 ? "🔒 Private" : "⛔ Invalid Guild"))
+          .catch(({ status }) =>
+            status === 403 ? "🔒 Private" : status === 429 ? "🕓 Ratelimited" : "⛔ Invalid Guild"
+          )
       )
       .then(value => ids.set(id, value));
 
@@ -333,6 +353,32 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
   }
 }
 
+function set(message: GatewayMessageCreateDispatchData, args: string[]) {
+  const id = args.shift();
+  const name = args.join(" ");
+  if (!snowflakeRegex.test(id)) return api.createMessage(message.channel_id, { content: "Invalid snowflake" });
+  if (!name) return api.createMessage(message.channel_id, { content: "No name specified" });
+  guilds[id] = name;
+
+  writeFileSync("guilds.json", JSON.stringify(guilds));
+  api.createMessage(message.channel_id, {
+    content: "Set `" + id + "` to **" + name + "**",
+    allowedMentions: { parse: [] }
+  });
+}
+
+function del(message: GatewayMessageCreateDispatchData, args: string[]) {
+  const id = args.shift();
+  if (!snowflakeRegex.test(id)) return api.createMessage(message.channel_id, { content: "Invalid snowflake" });
+  delete guilds[id];
+
+  writeFileSync("guilds.json", JSON.stringify(guilds));
+  api.createMessage(message.channel_id, {
+    content: "Deleted `" + id + "`",
+    allowedMentions: { parse: [] }
+  });
+}
+
 function haste(text: string) {
   return robert
     .post("https://commandtechno.com/paste/upload")
@@ -355,15 +401,15 @@ function haste(text: string) {
   const callback = async () => {
     const { articles } = await zendesk.get().send();
 
-    let [last] = await api.getChannelMessages(config.articles, { limit: "1" });
-    last ??= await api.createMessage(config.articles, {
-      content: "This channel has been setup to receive Support Articles"
-    });
+    let last;
+    try {
+      last = require("./articles.json");
+    } catch {
+      return writeFileSync("articles.json", JSON.stringify({ time: Date.now() }));
+    }
 
-    const after = articles.filter(
-      ({ created_at }) => new Date(created_at).getTime() > new Date(last.timestamp).getTime()
-    );
-
+    writeFileSync("articles.json", JSON.stringify({ time: Date.now() }));
+    const after = articles.filter(({ created_at }) => new Date(created_at).getTime() > last.time);
     if (after.length) {
       const data = {
         content: after.map(a => a.html_url).join("\n"),
