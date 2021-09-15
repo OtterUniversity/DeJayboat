@@ -291,18 +291,20 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
   const pending = await api.createMessage(message.channel_id, { content: "🔍 Loading..." });
 
   for await (const id of ids.keys()) {
-    await api
-      .getGuildPreview(id)
-      .then(({ name }) => name)
-      .catch(() =>
-        api
-          .getGuildWidget(id)
-          .then(({ name }) => name)
-          .catch(({ status }) =>
-            status === 403 ? "🔒 Private" : status === 429 ? "🕓 Ratelimited" : "⛔ Invalid Guild"
-          )
-      )
-      .then(value => ids.set(id, value));
+    if (guilds[id]) ids.set(id, guilds[id]);
+    else
+      await api
+        .getGuildPreview(id)
+        .then(({ name }) => name)
+        .catch(() =>
+          api
+            .getGuildWidget(id)
+            .then(({ name }) => name)
+            .catch(({ status }) =>
+              status === 403 ? "🔒 Private" : status === 429 ? "🕓 Ratelimited" : "⛔ Invalid Guild"
+            )
+        )
+        .then(value => ids.set(id, value));
 
     let completed = 0;
     let description = "";
