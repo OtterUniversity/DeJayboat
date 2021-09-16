@@ -413,23 +413,11 @@ async function list(message: GatewayMessageCreateDispatchData) {
     .map(g => g.join(" "))
     .join("\n");
 
-  const url = await haste(text);
-  api.createMessage(message.channel_id, {
-    content: "You can view the list of guilds at " + url,
-    components: [
-      {
-        type: 1,
-        components: [
-          {
-            url,
-            type: 2,
-            style: 5,
-            label: "Haste"
-          }
-        ]
-      }
-    ]
-  });
+  api.createMessage(
+    message.channel_id,
+    { content: "Here are the guilds I have stored!" },
+    { name: "list.txt", value: text }
+  );
 }
 
 function haste(text: string) {
