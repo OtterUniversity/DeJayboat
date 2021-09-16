@@ -118,6 +118,15 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
       case "del":
         del(d, args);
         break;
+      case "list":
+        list(d);
+        break;
+      case "help":
+        let help = "👌 You can use `massuser`, `massguild`, `set`, `delete`, `list`, `help`, `ping`";
+        if (config.owners.includes(d.author.id)) help += ", `eval`, `exec`, `update`";
+        api.createMessage(d.channel_id, {
+          content: help
+        });
       case "ping":
         const pingMessage = await api.createMessage(d.channel_id, { content: "Pinging gateway..." });
         const gatewayPing = await ws.ping();
@@ -233,7 +242,7 @@ async function massuser(message: GatewayMessageCreateDispatchData, args: string[
       description += "<@" + key + "> " + value + "\n";
     });
 
-    const percent = Math.round((completed / ids.size) * 25);
+    const percent = Math.round((completed / ids.size) * 10);
     if (!performance || completed === ids.size) {
       let components = [];
       if (description.length > 4000) {
@@ -259,7 +268,7 @@ async function massuser(message: GatewayMessageCreateDispatchData, args: string[
 
       await api.editMessage(pending.channel_id, pending.id, {
         components,
-        content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(25 - percent) + "] ",
+        content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(10 - percent) + "] ",
         embeds: [
           {
             color,
@@ -292,15 +301,15 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
   const pending = await api.createMessage(message.channel_id, { content: "🔍 Loading..." });
 
   for await (const id of ids.keys()) {
-    if (guilds[id]) ids.set(id, guilds[id]);
+    if (guilds[id]) ids.set(id, guilds[id] + "*");
     else
       await api
         .getGuildPreview(id)
-        .then(({ name }) => name)
+        .then(({ name }) => (guilds[id] = name))
         .catch(() =>
           api
             .getGuildWidget(id)
-            .then(({ name }) => name)
+            .then(({ name }) => (guilds[id] = name))
             .catch(({ status }) =>
               status === 403 ? "🔒 Private" : status === 429 ? "🕓 Ratelimited" : "⛔ Invalid Guild"
             )
@@ -314,7 +323,7 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
       description += "`" + key + "` " + value + "\n";
     });
 
-    const percent = Math.round((completed / ids.size) * 25);
+    const percent = Math.round((completed / ids.size) * 10);
     if (!performance || completed === ids.size) {
       let components = [];
       if (description.length > 4000) {
@@ -340,7 +349,7 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
 
       await api.editMessage(pending.channel_id, pending.id, {
         components,
-        content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(25 - percent) + "] ",
+        content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(10 - percent) + "] ",
         embeds: [
           {
             color,
@@ -348,7 +357,10 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
             title:
               completed === ids.size
                 ? "✅ Looked up **" + ids.size + "** guilds"
-                : "🔍 Looking up **" + ids.size + "** guilds"
+                : "🔍 Looking up **" + ids.size + "** guilds",
+            footer: {
+              text: "* = Acquired from Store"
+            }
           }
         ]
       });
@@ -361,6 +373,14 @@ function set(message: GatewayMessageCreateDispatchData, args: string[]) {
   const name = args.join(" ");
   if (!exactSnowflakeRegex.test(id)) return api.createMessage(message.channel_id, { content: "Invalid snowflake" });
   if (!name) return api.createMessage(message.channel_id, { content: "No name specified" });
+
+  const current = guilds[id];
+  if (current)
+    return api.createMessage(message.channel_id, {
+      content: "`" + id + "` is already set to **" + name + "**, please delete it with `.delete " + id + "` first",
+      allowedMentions: { parse: [] }
+    });
+
   guilds[id] = name;
 
   writeFileSync("guilds.json", JSON.stringify(guilds));
@@ -373,12 +393,35 @@ function set(message: GatewayMessageCreateDispatchData, args: string[]) {
 function del(message: GatewayMessageCreateDispatchData, args: string[]) {
   const id = args.shift();
   if (!exactSnowflakeRegex.test(id)) return api.createMessage(message.channel_id, { content: "Invalid snowflake" });
+
+  const current = guilds[id];
+  if (current) return api.createMessage(message.channel_id, { content: "`" + id + "` doesn't exist in the database" });
+
   delete guilds[id];
 
   writeFileSync("guilds.json", JSON.stringify(guilds));
   api.createMessage(message.channel_id, {
     content: "Deleted `" + id + "`",
     allowedMentions: { parse: [] }
+  });
+}
+
+async function list(message: GatewayMessageCreateDispatchData) {
+  const text = Object.entries(guilds)
+    .map(g => g.join(" "))
+    .join("\n");
+
+  const url = await haste(text);
+  api.createMessage(message.channel_id, {
+    content: "You can view the list of guilds at " + url,
+    components: [
+      {
+        url,
+        type: 2,
+        style: 5,
+        label: "Jump"
+      }
+    ]
   });
 }
 
