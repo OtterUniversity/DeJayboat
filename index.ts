@@ -2,12 +2,12 @@ import * as config from "./config.js";
 import * as ottercord from "ottercord";
 import * as robert from "robert";
 
-import { Gateway } from "detritus-client-socket";
 import { GatewayMessageCreateDispatchData } from "discord-api-types/v9";
+import { writeFileSync, readFileSync } from "fs";
 import { execSync } from "child_process";
+import { Gateway } from "detritus-client-socket";
 import { inspect } from "util";
 import { load } from "cheerio";
-import { writeFileSync } from "fs";
 
 const ws = new Gateway.Socket(config.token);
 const api = ottercord(config.token);
@@ -24,7 +24,7 @@ const color = parseInt("36393f", 16);
 
 let guilds = {};
 try {
-  guilds = require("./guilds.json");
+  guilds = JSON.parse(readFileSync("guilds.json", "utf-8"));
 } catch {
   writeFileSync("guilds.json", JSON.stringify({}));
 }
@@ -32,7 +32,7 @@ try {
 ws.on("ready", () => {
   let shutdown;
   try {
-    shutdown = require("./shutdown.json");
+    shutdown = JSON.parse(readFileSync("shutdown.json", "utf-8"));
   } catch {
     return;
   }
@@ -456,7 +456,7 @@ function haste(text: string) {
 
     let last;
     try {
-      last = require("./articles.json");
+      last = JSON.parse(readFileSync("articles.json", "utf-8"));
     } catch {
       return writeFileSync("articles.json", JSON.stringify({ time: Date.now() }));
     }
