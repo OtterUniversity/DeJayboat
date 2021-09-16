@@ -127,6 +127,7 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
         api.createMessage(d.channel_id, {
           content: help
         });
+        break;
       case "ping":
         const pingMessage = await api.createMessage(d.channel_id, { content: "Pinging gateway..." });
         const gatewayPing = await ws.ping();
@@ -395,7 +396,8 @@ function del(message: GatewayMessageCreateDispatchData, args: string[]) {
   if (!exactSnowflakeRegex.test(id)) return api.createMessage(message.channel_id, { content: "Invalid snowflake" });
 
   const current = guilds[id];
-  if (current) return api.createMessage(message.channel_id, { content: "`" + id + "` doesn't exist in the database" });
+  if (current)
+    return api.createMessage(message.channel_id, { content: "`" + id + "` doesn't exist in the ||JSON|| database" });
 
   delete guilds[id];
 
@@ -416,10 +418,15 @@ async function list(message: GatewayMessageCreateDispatchData) {
     content: "You can view the list of guilds at " + url,
     components: [
       {
-        url,
-        type: 2,
-        style: 5,
-        label: "Jump"
+        type: 1,
+        components: [
+          {
+            url,
+            type: 2,
+            style: 5,
+            label: "Haste"
+          }
+        ]
       }
     ]
   });
