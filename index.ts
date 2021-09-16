@@ -396,8 +396,8 @@ function del(message: GatewayMessageCreateDispatchData, args: string[]) {
   if (!exactSnowflakeRegex.test(id)) return api.createMessage(message.channel_id, { content: "Invalid snowflake" });
 
   const current = guilds[id];
-  if (current)
-    return api.createMessage(message.channel_id, { content: "`" + id + "` doesn't exist in the ||JSON|| database" });
+  if (!current)
+    return api.createMessage(message.channel_id, { content: "`" + id + "` doesn't exist in the ||(json)|| database" });
 
   delete guilds[id];
 
