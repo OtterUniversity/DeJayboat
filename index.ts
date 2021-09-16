@@ -409,14 +409,11 @@ function del(message: GatewayMessageCreateDispatchData, args: string[]) {
 }
 
 async function list(message: GatewayMessageCreateDispatchData) {
-  const text = Object.entries(guilds)
-    .map(g => g.join(" "))
-    .join("\n");
-
+  const text = Object.entries(guilds).map(g => g.join(" "));
   api.createMessage(
     message.channel_id,
-    { content: "Here are the guilds I have stored!" },
-    { name: "list.txt", value: text }
+    { content: "Here are the **" + text.length + "** guilds I have stored" },
+    { name: "list.txt", value: text.join("\n") }
   );
 }
 
