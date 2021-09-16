@@ -122,7 +122,7 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
         list(d);
         break;
       case "help":
-        let help = "👌 You can use `massuser`, `massguild`, `set`, `delete`, `list`, `help`, `ping`";
+        let help = "👌 You can use: `massuser`, `massguild`, `set`, `delete`, `list`, `help`, `ping`";
         if (config.owners.includes(d.author.id)) help += ", `eval`, `exec`, `update`";
         api.createMessage(d.channel_id, {
           content: help
