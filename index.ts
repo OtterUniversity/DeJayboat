@@ -8,7 +8,7 @@ import { execSync } from "child_process";
 import { Gateway } from "detritus-client-socket";
 import { inspect } from "util";
 import { load } from "cheerio";
-import Fuse from "fuse.js";
+import * as Fuse from "fuse.js";
 
 const ws = new Gateway.Socket(config.token);
 const api = ottercord(config.token);
@@ -351,6 +351,8 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
 function search(message: GatewayMessageCreateDispatchData, args: string[]) {
   if (!args.length) api.createMessage(message.channel_id, { content: "No query specified" });
   const query = args.join(" ");
+
+  //@ts-ignore fuse's typings are stupid
   const engine = new Fuse(
     Object.entries(guilds).map(([id, name]) => ({ id, name })),
     { keys: ["name"] }
