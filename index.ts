@@ -126,7 +126,7 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
         list(d);
         break;
       case "help":
-        let help = "👌 You can use: `massuser`, `massguild`, `set`, `delete`, `list`, `help`, `ping`";
+        let help = "👌 You can use: `massuser`, `massguild`, `search`, `set`, `delete`, `list`, `help`, `ping`";
         if (config.owners.includes(d.author.id)) help += ", `eval`, `exec`, `update`";
         api.createMessage(d.channel_id, {
           content: help
@@ -356,10 +356,12 @@ function search(message: GatewayMessageCreateDispatchData, args: string[]) {
     { keys: ["name"] }
   );
 
-  const results = engine.search(query).map(result => result.item.name);
+  const results = engine.search(query).map(result => "`" + result.item.id + "` " + result.item.name);
   if (!results.length) return api.createMessage(message.channel_id, { content: "No results found" });
 
-  api.createMessage(message.channel_id, { embeds: [{ title: "🔍 Search Results", description: results.join("\n") }] });
+  api.createMessage(message.channel_id, {
+    embeds: [{ title: "🔍 Search Results", description: results.slice(0, 10).join("\n") }]
+  });
 }
 
 function set(message: GatewayMessageCreateDispatchData, args: string[]) {
