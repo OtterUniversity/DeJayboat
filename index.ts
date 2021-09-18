@@ -290,9 +290,10 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
 
   const ids = new Map(input.match(snowflakeRegex)?.map(key => [key, guilds[key] ?? "🔍 Loading..."]));
   if (!ids.size) return api.createMessage(message.channel_id, { content: "No IDs found" });
-  if (ids.size > 1000) return api.createMessage(message.channel_id, { content: "Cannot lookup more than 1000 guilds" });
-  const pending = await api.createMessage(message.channel_id, { content: "🔍 Loading..." });
+  if ([...ids.values()].filter(value => value === "🔍 Loading...").length > 1000)
+    return api.createMessage(message.channel_id, { content: "Cannot lookup more than 1000 guilds" });
 
+  const pending = await api.createMessage(message.channel_id, { content: "🔍 Loading..." });
   for await (const [id, status] of ids.entries()) {
     if (status === "🔍 Loading...")
       await api
@@ -319,7 +320,7 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
     if (!performance || completed === ids.size) {
       let file;
       if (description.length > 4000) {
-        if (completed === ids.size) file = { name: "users.txt", value: description };
+        if (completed === ids.size) file = { name: "guilds.txt", value: description };
         description = description.slice(0, 4000);
       }
 
@@ -344,6 +345,8 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
         },
         file
       );
+
+      if (completed === ids.size) break;
     }
   }
 }
