@@ -8,6 +8,7 @@ import { execSync } from "child_process";
 import { Gateway } from "detritus-client-socket";
 import { inspect } from "util";
 import { load } from "cheerio";
+import Fuse from "fuse.js";
 
 const ws = new Gateway.Socket(config.token);
 const api = ottercord(config.token);
@@ -110,6 +111,9 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
         break;
       case "massguild":
         massguild(d, args);
+        break;
+      case "search":
+        search(d, args);
         break;
       case "set":
         set(d, args);
@@ -245,42 +249,30 @@ async function massuser(message: GatewayMessageCreateDispatchData, args: string[
 
     const percent = Math.round((completed / ids.size) * 10);
     if (!performance || completed === ids.size) {
-      let components = [];
+      let file;
       if (description.length > 4000) {
-        if (completed === ids.size) {
-          const url = await haste(description);
-          components = [
-            {
-              type: 1,
-              components: [
-                {
-                  url,
-                  type: 2,
-                  style: 5,
-                  label: "Haste"
-                }
-              ]
-            }
-          ];
-        }
-
+        if (completed === ids.size) file = { name: "users.txt", value: description };
         description = description.slice(0, 4000);
       }
 
-      await api.editMessage(pending.channel_id, pending.id, {
-        components,
-        content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(10 - percent) + "] ",
-        embeds: [
-          {
-            color,
-            description,
-            title:
-              completed === ids.size
-                ? "✅ Looked up **" + ids.size + "** users"
-                : "🔍 Looking up **" + ids.size + "** users"
-          }
-        ]
-      });
+      await api.editMessage(
+        pending.channel_id,
+        pending.id,
+        {
+          content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(10 - percent) + "] ",
+          embeds: [
+            {
+              color,
+              description,
+              title:
+                completed === ids.size
+                  ? "✅ Looked up **" + ids.size + "** users"
+                  : "🔍 Looking up **" + ids.size + "** users"
+            }
+          ]
+        },
+        file
+      );
     }
   }
 }
@@ -296,23 +288,22 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
     input = await robert.get(attachment.url).send("text");
   }
 
-  const ids = new Map(input.match(snowflakeRegex)?.map(key => [key, "🔍 Loading..."]));
+  const ids = new Map(input.match(snowflakeRegex)?.map(key => [key, guilds[key] ?? "🔍 Loading..."]));
   if (!ids.size) return api.createMessage(message.channel_id, { content: "No IDs found" });
   if (ids.size > 1000) return api.createMessage(message.channel_id, { content: "Cannot lookup more than 1000 guilds" });
   const pending = await api.createMessage(message.channel_id, { content: "🔍 Loading..." });
 
-  for await (const id of ids.keys()) {
-    if (guilds[id]) ids.set(id, guilds[id] + "*");
-    else
+  for await (const [id, status] of ids.entries()) {
+    if (status === "🔍 Loading...")
       await api
         .getGuildPreview(id)
-        .then(({ name }) => (guilds[id] = name))
+        .then(({ name }) => (guilds[id] = name + "^"))
         .catch(() =>
           api
             .getGuildWidget(id)
-            .then(({ name }) => (guilds[id] = name))
+            .then(({ name }) => (guilds[id] = name + "^"))
             .catch(({ status }) =>
-              status === 403 ? "🔒 Private" : status === 429 ? "🕓 Ratelimited" : "⛔ Invalid Guild"
+              status === 403 ? "🔒 Private" : status === 429 ? "🕓 Widget Ratelimited" : "⛔ Invalid Guild"
             )
         )
         .then(value => ids.set(id, value));
@@ -326,47 +317,49 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
 
     const percent = Math.round((completed / ids.size) * 10);
     if (!performance || completed === ids.size) {
-      let components = [];
+      let file;
       if (description.length > 4000) {
-        if (completed === ids.size) {
-          const url = await haste(description);
-          components = [
-            {
-              type: 1,
-              components: [
-                {
-                  url,
-                  type: 2,
-                  style: 5,
-                  label: "Haste"
-                }
-              ]
-            }
-          ];
-        }
-
+        if (completed === ids.size) file = { name: "users.txt", value: description };
         description = description.slice(0, 4000);
       }
 
-      await api.editMessage(pending.channel_id, pending.id, {
-        components,
-        content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(10 - percent) + "] ",
-        embeds: [
-          {
-            color,
-            description,
-            title:
-              completed === ids.size
-                ? "✅ Looked up **" + ids.size + "** guilds"
-                : "🔍 Looking up **" + ids.size + "** guilds",
-            footer: {
-              text: "* = Acquired from Store"
+      await api.editMessage(
+        pending.channel_id,
+        pending.id,
+        {
+          content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(10 - percent) + "] ",
+          embeds: [
+            {
+              color,
+              description,
+              title:
+                completed === ids.size
+                  ? "✅ Looked up **" + ids.size + "** guilds"
+                  : "🔍 Looking up **" + ids.size + "** guilds",
+              footer: {
+                text: "* = From Preview | ^ = From Widget"
+              }
             }
-          }
-        ]
-      });
+          ]
+        },
+        file
+      );
     }
   }
+}
+
+function search(message: GatewayMessageCreateDispatchData, args: string[]) {
+  if (!args.length) api.createMessage(message.channel_id, { content: "No query specified" });
+  const query = args.join(" ");
+  const engine = new Fuse(
+    Object.entries(guilds).map(([id, name]) => ({ id, name })),
+    { keys: ["name"] }
+  );
+
+  const results = engine.search(query).map(result => result.item.name);
+  if (!results.length) return api.createMessage(message.channel_id, { content: "No results found" });
+
+  api.createMessage(message.channel_id, { embeds: [{ title: "🔍 Search Results", description: results.join("\n") }] });
 }
 
 function set(message: GatewayMessageCreateDispatchData, args: string[]) {
@@ -415,14 +408,6 @@ async function list(message: GatewayMessageCreateDispatchData) {
     { content: "Here are the **" + text.length + "** guilds I have stored" },
     { name: "list.txt", value: text.join("\n") }
   );
-}
-
-function haste(text: string) {
-  return robert
-    .post("https://commandtechno.com/paste/upload")
-    .text(text)
-    .send("text")
-    .then(id => "https://commandtechno.com/paste/" + id);
 }
 
 (async () => {

@@ -14,6 +14,7 @@
     "cheerio": "^1.0.0-rc.10",
     "detritus-client-socket": "^0.8.2",
     "discord-api-types": "^0.22.0",
+    "fuse.js": "^6.4.6",
     "ottercord": "^1.0.8",
     "robert": "^2.0.6"
   }
