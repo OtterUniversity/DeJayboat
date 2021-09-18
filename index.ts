@@ -1,6 +1,7 @@
 import * as config from "./config.js";
 import * as ottercord from "ottercord";
 import * as robert from "robert";
+import * as fuse from "fuse.js";
 
 import { GatewayMessageCreateDispatchData } from "discord-api-types/v9";
 import { writeFileSync, readFileSync } from "fs";
@@ -8,7 +9,6 @@ import { execSync } from "child_process";
 import { Gateway } from "detritus-client-socket";
 import { inspect } from "util";
 import { load } from "cheerio";
-import * as Fuse from "fuse.js";
 
 const ws = new Gateway.Socket(config.token);
 const api = ottercord(config.token);
@@ -353,7 +353,7 @@ function search(message: GatewayMessageCreateDispatchData, args: string[]) {
   const query = args.join(" ");
 
   //@ts-ignore fuse's typings are stupid
-  const engine = new Fuse(
+  const engine = new fuse(
     Object.entries(guilds).map(([id, name]) => ({ id, name })),
     { keys: ["name"] }
   );
