@@ -362,7 +362,14 @@ function search(message: GatewayMessageCreateDispatchData, args: string[]) {
   if (!results.length) return api.createMessage(message.channel_id, { content: "No results found" });
 
   api.createMessage(message.channel_id, {
-    embeds: [{ title: "🔍 Search Results", description: results.slice(0, 10).join("\n") }]
+    embeds: [
+      {
+        color,
+        title: "🔍 Search Results",
+        description: results.slice(0, 10).join("\n"),
+        footer: { text: results.length + " Results" }
+      }
+    ]
   });
 }
 
