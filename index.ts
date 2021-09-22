@@ -42,27 +42,60 @@ ws.on("ready", () => {
   api.editMessage(shutdown.channel, shutdown.message, { content: "🟢 Online" });
 });
 
-ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchData }) => {
-  if (t === "MESSAGE_CREATE") {
-    if (d.channel_id === config.datamining) {
-      const [embed] = d.embeds;
-      const images = embed?.description?.match(/https?:\/\/\S+\.(png|jpg|jpeg|webp)\b/g);
-      if (images) {
+ws.on(
+  "packet",
+  async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchData }) => {
+    if (t === "MESSAGE_CREATE") {
+      if (d.channel_id === config.datamining) {
+        const [embed] = d.embeds;
+        const images = embed?.description?.match(
+          /https?:\/\/\S+\.(png|jpg|jpeg|webp)\b/g
+        );
+        if (images) {
+          const files = [];
+          for await (const image of images.slice(0, 10)) {
+            let validImage;
+            try {
+              new URL(image);
+              validImage = true;
+            } catch {}
+
+            if (validImage)
+              await robert
+                .get(image)
+                .send("buffer")
+                .then(value =>
+                  files.push({
+                    name: "image" + files.length + "." + image.split(".").pop(),
+                    value
+                  })
+                )
+                .catch(() => {});
+          }
+
+          if (files.length) api.createMessage(d.channel_id, {}, files);
+        }
+      }
+
+      const svgs = d.content.match(/https?:\/\/\S+\.svg\b/g);
+      if (svgs) {
         const files = [];
-        for await (const image of images.slice(0, 10)) {
-          let validImage;
+        for await (const svg of svgs.slice(0, 10)) {
+          let validSvg;
           try {
-            new URL(image);
-            validImage = true;
+            new URL(svg);
+            validSvg = true;
           } catch {}
 
-          if (validImage)
+          if (validSvg)
             await robert
-              .get(image)
+              .get("https://util.bruhmomentlol.repl.co/svg")
+              .query("q", svg)
+              .query("width", 400)
               .send("buffer")
               .then(value =>
                 files.push({
-                  name: "image" + files.length + "." + image.split(".").pop(),
+                  name: "image" + files.length + ".png",
                   value
                 })
               )
@@ -71,167 +104,182 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
 
         if (files.length) api.createMessage(d.channel_id, {}, files);
       }
-    }
 
-    const svgs = d.content.match(/https?:\/\/\S+\.svg\b/g);
-    if (svgs) {
-      const files = [];
-      for await (const svg of svgs.slice(0, 10)) {
-        let validSvg;
-        try {
-          new URL(svg);
-          validSvg = true;
-        } catch {}
+      if (!d.content.startsWith(config.prefix)) return;
+      const args = d.content.slice(config.prefix.length).split(/ +/);
+      const command = args.shift();
 
-        if (validSvg)
-          await robert
-            .get("https://util.bruhmomentlol.repl.co/svg")
-            .query("q", svg)
-            .query("width", 400)
-            .send("buffer")
-            .then(value =>
-              files.push({
-                name: "image" + files.length + ".png",
-                value
-              })
-            )
-            .catch(() => {});
-      }
+      switch (command) {
+        case "massuser":
+          massuser(d, args);
+          break;
+        case "massguild":
+          massguild(d, args);
+          break;
+        case "override":
+          override(d, args);
+          break;
+        case "search":
+          search(d, args);
+          break;
+        case "set":
+          set(d, args);
+          break;
+        case "delete":
+        case "del":
+          del(d, args);
+          break;
+        case "list":
+          list(d);
+          break;
+        case "help":
+          let help =
+            "👌 You can use: `massuser`, `massguild`, `override`, `search`, `set`, `delete`, `list`, `help`, `ping`";
+          if (config.owners.includes(d.author.id))
+            help += ", `eval`, `exec`, `update`";
+          api.createMessage(d.channel_id, {
+            content: help
+          });
+          break;
+        case "ping":
+          const pingMessage = await api.createMessage(d.channel_id, {
+            content: "Pinging gateway..."
+          });
+          const gatewayPing = await ws.ping();
+          api.editMessage(d.channel_id, pingMessage.id, {
+            content: "🕓 **" + gatewayPing + "ms** Gateway\nPinging rest..."
+          });
 
-      if (files.length) api.createMessage(d.channel_id, {}, files);
-    }
+          const restStart = Date.now();
+          await api.getCurrentUser();
+          const restPing = Date.now() - restStart;
+          api.editMessage(d.channel_id, pingMessage.id, {
+            content:
+              "🕓 **" +
+              gatewayPing +
+              "ms** Gateway\n🕓 **" +
+              restPing +
+              "ms** Rest"
+          });
+          break;
+        case "eval":
+          if (config.owners.includes(d.author.id)) {
+            try {
+              let res = eval(args.join(" "));
+              if (res instanceof Promise) {
+                api.createMessage(d.channel_id, {
+                  content: "<a:crumbdance:877043850890317855> Resolving Promise"
+                });
 
-    if (!d.content.startsWith(config.prefix)) return;
-    const args = d.content.slice(config.prefix.length).split(/ +/);
-    const command = args.shift();
-
-    switch (command) {
-      case "massuser":
-        massuser(d, args);
-        break;
-      case "massguild":
-        massguild(d, args);
-        break;
-      case "search":
-        search(d, args);
-        break;
-      case "set":
-        set(d, args);
-        break;
-      case "delete":
-      case "del":
-        del(d, args);
-        break;
-      case "list":
-        list(d);
-        break;
-      case "help":
-        let help = "👌 You can use: `massuser`, `massguild`, `search`, `set`, `delete`, `list`, `help`, `ping`";
-        if (config.owners.includes(d.author.id)) help += ", `eval`, `exec`, `update`";
-        api.createMessage(d.channel_id, {
-          content: help
-        });
-        break;
-      case "ping":
-        const pingMessage = await api.createMessage(d.channel_id, { content: "Pinging gateway..." });
-        const gatewayPing = await ws.ping();
-        api.editMessage(d.channel_id, pingMessage.id, {
-          content: "🕓 **" + gatewayPing + "ms** Gateway\nPinging rest..."
-        });
-
-        const restStart = Date.now();
-        await api.getCurrentUser();
-        const restPing = Date.now() - restStart;
-        api.editMessage(d.channel_id, pingMessage.id, {
-          content: "🕓 **" + gatewayPing + "ms** Gateway\n🕓 **" + restPing + "ms** Rest"
-        });
-        break;
-      case "eval":
-        if (config.owners.includes(d.author.id)) {
-          try {
-            let res = eval(args.join(" "));
-            if (res instanceof Promise) {
-              api.createMessage(d.channel_id, {
-                content: "<a:crumbdance:877043850890317855> Resolving Promise"
-              });
-
-              try {
-                res = await res;
-              } catch (e) {
-                return api.createMessage(d.channel_id, { content: e?.message ?? e ?? "⚠ Unknown Error" });
+                try {
+                  res = await res;
+                } catch (e) {
+                  return api.createMessage(d.channel_id, {
+                    content: e?.message ?? e ?? "⚠ Unknown Error"
+                  });
+                }
               }
+
+              api.createMessage(d.channel_id, {
+                embeds: [
+                  {
+                    color,
+                    description:
+                      "```js\n" +
+                      inspect(res, { depth: 1 }).toString().trim() +
+                      "```"
+                  }
+                ]
+              });
+            } catch (e) {
+              api.createMessage(d.channel_id, {
+                content: e?.message ?? e ?? "⚠ Unknown Error"
+              });
             }
-
-            api.createMessage(d.channel_id, {
-              embeds: [
-                {
-                  color,
-                  description: "```js\n" + inspect(res, { depth: 1 }).toString().trim() + "```"
-                }
-              ]
-            });
-          } catch (e) {
-            api.createMessage(d.channel_id, { content: e?.message ?? e ?? "⚠ Unknown Error" });
           }
-        }
-        break;
-      case "exec":
-        if (config.owners.includes(d.author.id)) {
-          try {
-            const res = execSync(args.join(" "), { timeout: 10000 });
-            api.createMessage(d.channel_id, {
-              embeds: [
-                {
-                  color,
-                  description: "```js\n" + res.toString().slice(0, 4000) + "```"
-                }
-              ]
-            });
-          } catch (e) {
-            api.createMessage(d.channel_id, { content: e?.message ?? e ?? "⚠ Unknown Error" });
+          break;
+        case "exec":
+          if (config.owners.includes(d.author.id)) {
+            try {
+              const res = execSync(args.join(" "), { timeout: 10000 });
+              api.createMessage(d.channel_id, {
+                embeds: [
+                  {
+                    color,
+                    description:
+                      "```js\n" + res.toString().slice(0, 4000) + "```"
+                  }
+                ]
+              });
+            } catch (e) {
+              api.createMessage(d.channel_id, {
+                content: e?.message ?? e ?? "⚠ Unknown Error"
+              });
+            }
           }
-        }
-        break;
-      case "update":
-        if (config.owners.includes(d.author.id)) {
-          const updateMessage = await api.createMessage(d.channel_id, { content: "Pulling from GitHub" });
-          execSync("git pull");
-          await api.editMessage(d.channel_id, updateMessage.id, { content: "Installing dependencies" });
-          execSync("npm install");
-          await api.editMessage(d.channel_id, updateMessage.id, { content: "Compiling typescript" });
-          execSync("npm run build");
-          await api.editMessage(d.channel_id, updateMessage.id, { content: "Exiting process" });
-          writeFileSync(
-            "shutdown.json",
-            JSON.stringify({
-              channel: d.channel_id,
-              message: updateMessage.id,
-              time: Date.now()
-            })
-          );
+          break;
+        case "update":
+          if (config.owners.includes(d.author.id)) {
+            const updateMessage = await api.createMessage(d.channel_id, {
+              content: "Pulling from GitHub"
+            });
+            execSync("git pull");
+            await api.editMessage(d.channel_id, updateMessage.id, {
+              content: "Installing dependencies"
+            });
+            execSync("npm install");
+            await api.editMessage(d.channel_id, updateMessage.id, {
+              content: "Compiling typescript"
+            });
+            execSync("npm run build");
+            await api.editMessage(d.channel_id, updateMessage.id, {
+              content: "Exiting process"
+            });
+            writeFileSync(
+              "shutdown.json",
+              JSON.stringify({
+                channel: d.channel_id,
+                message: updateMessage.id,
+                time: Date.now()
+              })
+            );
 
-          process.exit();
-        }
-        break;
+            process.exit();
+          }
+          break;
+      }
     }
   }
-});
+);
 
-async function massuser(message: GatewayMessageCreateDispatchData, args: string[]) {
+async function massuser(
+  message: GatewayMessageCreateDispatchData,
+  args: string[]
+) {
   let input = args.join(" ");
   let performance = args.includes("-f") || args.includes("--fast");
   if (!input) {
     const [attachment] = message.attachments;
     if (!attachment?.content_type.endsWith("charset=utf-8"))
-      return api.createMessage(message.channel_id, { content: "No input found" });
+      return api.createMessage(message.channel_id, {
+        content: "No input found"
+      });
 
     input = await robert.get(attachment.url).send("text");
   }
 
-  const ids = new Map(input.match(snowflakeRegex)?.map(key => [key, "🔍 Loading..."]));
-  if (!ids.size) return api.createMessage(message.channel_id, { content: "No IDs found" });
-  if (ids.size > 1000) return api.createMessage(message.channel_id, { content: "Cannot lookup more than 1000 users" });
-  const pending = await api.createMessage(message.channel_id, { content: "🔍 Loading..." });
+  const ids = new Map(
+    input.match(snowflakeRegex)?.map(key => [key, "🔍 Loading..."])
+  );
+  if (!ids.size)
+    return api.createMessage(message.channel_id, { content: "No IDs found" });
+  if (ids.size > 1000)
+    return api.createMessage(message.channel_id, {
+      content: "Cannot lookup more than 1000 users"
+    });
+  const pending = await api.createMessage(message.channel_id, {
+    content: "🔍 Loading..."
+  });
 
   for await (const id of ids.keys()) {
     await api
@@ -251,7 +299,8 @@ async function massuser(message: GatewayMessageCreateDispatchData, args: string[
     if (!performance || completed === ids.size) {
       let file;
       if (description.length > 4000) {
-        if (completed === ids.size) file = { name: "users.txt", value: description };
+        if (completed === ids.size)
+          file = { name: "users.txt", value: description };
         description = description.slice(0, 4000);
       }
 
@@ -259,7 +308,15 @@ async function massuser(message: GatewayMessageCreateDispatchData, args: string[
         pending.channel_id,
         pending.id,
         {
-          content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(10 - percent) + "] ",
+          content:
+            "(`" +
+            completed +
+            "/" +
+            ids.size +
+            "`) [" +
+            "⬜".repeat(percent) +
+            "🔳".repeat(10 - percent) +
+            "] ",
           embeds: [
             {
               color,
@@ -277,23 +334,39 @@ async function massuser(message: GatewayMessageCreateDispatchData, args: string[
   }
 }
 
-async function massguild(message: GatewayMessageCreateDispatchData, args: string[]) {
+async function massguild(
+  message: GatewayMessageCreateDispatchData,
+  args: string[]
+) {
   let input = args.join(" ");
   let performance = args.includes("-f") || args.includes("--fast");
   if (!input) {
     const [attachment] = message.attachments;
     if (!attachment?.content_type.endsWith("charset=utf-8"))
-      return api.createMessage(message.channel_id, { content: "No input found" });
+      return api.createMessage(message.channel_id, {
+        content: "No input found"
+      });
 
     input = await robert.get(attachment.url).send("text");
   }
 
-  const ids = new Map(input.match(snowflakeRegex)?.map(key => [key, guilds[key] ?? "🔍 Loading..."]));
-  if (!ids.size) return api.createMessage(message.channel_id, { content: "No IDs found" });
-  if ([...ids.values()].filter(value => value === "🔍 Loading...").length > 1000)
-    return api.createMessage(message.channel_id, { content: "Cannot lookup more than 1000 guilds" });
+  const ids = new Map(
+    input
+      .match(snowflakeRegex)
+      ?.map(key => [key, guilds[key] ?? "🔍 Loading..."])
+  );
+  if (!ids.size)
+    return api.createMessage(message.channel_id, { content: "No IDs found" });
+  if (
+    [...ids.values()].filter(value => value === "🔍 Loading...").length > 1000
+  )
+    return api.createMessage(message.channel_id, {
+      content: "Cannot lookup more than 1000 guilds"
+    });
 
-  const pending = await api.createMessage(message.channel_id, { content: "🔍 Loading..." });
+  const pending = await api.createMessage(message.channel_id, {
+    content: "🔍 Loading..."
+  });
   for await (const [id, status] of ids.entries()) {
     if (status === "🔍 Loading...")
       await api
@@ -304,7 +377,11 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
             .getGuildWidget(id)
             .then(({ name }) => (guilds[id] = name + "^"))
             .catch(({ status }) =>
-              status === 403 ? "🔒 Private" : status === 429 ? "🕓 Widget Ratelimited" : "⛔ Invalid Guild"
+              status === 403
+                ? "🔒 Private"
+                : status === 429
+                ? "🕓 Widget Ratelimited"
+                : "⛔ Invalid Guild"
             )
         )
         .then(value => ids.set(id, value));
@@ -320,7 +397,8 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
     if (!performance || completed === ids.size) {
       let file;
       if (description.length > 4000) {
-        if (completed === ids.size) file = { name: "guilds.txt", value: description };
+        if (completed === ids.size)
+          file = { name: "guilds.txt", value: description };
         description = description.slice(0, 4000);
       }
 
@@ -328,7 +406,15 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
         pending.channel_id,
         pending.id,
         {
-          content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(10 - percent) + "] ",
+          content:
+            "(`" +
+            completed +
+            "/" +
+            ids.size +
+            "`) [" +
+            "⬜".repeat(percent) +
+            "🔳".repeat(10 - percent) +
+            "] ",
           embeds: [
             {
               color,
@@ -351,8 +437,61 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
   }
 }
 
+function override(message: GatewayMessageCreateDispatchData, [arg]: string[]) {
+  try {
+    const data = JSON.parse(
+      Buffer.from(arg.split(".").pop(), "base64").toString()
+    );
+
+    const fields = Object.entries(data.targetBuildOverride).map(
+      ([platform, target]) => ({
+        name: platform,
+        //@ts-ignore im lazy
+        value: "`" + target.type + "` " + target.id
+      })
+    );
+
+    api.createMessage(message.channel_id, {
+      content: "```json\n" + JSON.stringify(data, null, 2) + "```",
+      embeds: [
+        {
+          timestamp: new Date(data.expiresAt),
+          footer: {
+            text: "Expires"
+          },
+          fields: [
+            {
+              name: "Users",
+              value: data.validForUserIds.join(" ") || "None",
+              inline: true
+            },
+            {
+              name: "Release Channel",
+              value: data.releaseChannel ?? "None",
+              inline: true
+            },
+            {
+              name: "Allow Logged Out",
+              value: data.allowLoggedOut.toString(),
+              inline: true
+            },
+
+            ...fields
+          ]
+        }
+      ]
+    });
+  } catch (e) {
+    api.createMessage(message.channel_id, {
+      content: "⚠ " + e.message,
+      allowedMentions: { parse: [] }
+    });
+  }
+}
+
 function search(message: GatewayMessageCreateDispatchData, args: string[]) {
-  if (!args.length) api.createMessage(message.channel_id, { content: "No query specified" });
+  if (!args.length)
+    api.createMessage(message.channel_id, { content: "No query specified" });
   const query = args.join(" ");
 
   //@ts-ignore fuse's typings are stupid
@@ -361,8 +500,13 @@ function search(message: GatewayMessageCreateDispatchData, args: string[]) {
     { keys: ["name"] }
   );
 
-  const results = engine.search(query).map(result => "`" + result.item.id + "` " + result.item.name);
-  if (!results.length) return api.createMessage(message.channel_id, { content: "No results found" });
+  const results = engine
+    .search(query)
+    .map(result => "`" + result.item.id + "` " + result.item.name);
+  if (!results.length)
+    return api.createMessage(message.channel_id, {
+      content: "No results found"
+    });
 
   api.createMessage(message.channel_id, {
     embeds: [
@@ -379,13 +523,26 @@ function search(message: GatewayMessageCreateDispatchData, args: string[]) {
 function set(message: GatewayMessageCreateDispatchData, args: string[]) {
   const id = args.shift();
   const name = args.join(" ");
-  if (!exactSnowflakeRegex.test(id)) return api.createMessage(message.channel_id, { content: "Invalid snowflake" });
-  if (!name) return api.createMessage(message.channel_id, { content: "No name specified" });
+  if (!exactSnowflakeRegex.test(id))
+    return api.createMessage(message.channel_id, {
+      content: "Invalid snowflake"
+    });
+  if (!name)
+    return api.createMessage(message.channel_id, {
+      content: "No name specified"
+    });
 
   const current = guilds[id];
   if (current)
     return api.createMessage(message.channel_id, {
-      content: "`" + id + "` is already set to **" + name + "**, please delete it with `.delete " + id + "` first",
+      content:
+        "`" +
+        id +
+        "` is already set to **" +
+        name +
+        "**, please delete it with `.delete " +
+        id +
+        "` first",
       allowedMentions: { parse: [] }
     });
 
@@ -400,11 +557,16 @@ function set(message: GatewayMessageCreateDispatchData, args: string[]) {
 
 function del(message: GatewayMessageCreateDispatchData, args: string[]) {
   const id = args.shift();
-  if (!exactSnowflakeRegex.test(id)) return api.createMessage(message.channel_id, { content: "Invalid snowflake" });
+  if (!exactSnowflakeRegex.test(id))
+    return api.createMessage(message.channel_id, {
+      content: "Invalid snowflake"
+    });
 
   const current = guilds[id];
   if (!current)
-    return api.createMessage(message.channel_id, { content: "`" + id + "` doesn't exist in the ||(json)|| database" });
+    return api.createMessage(message.channel_id, {
+      content: "`" + id + "` doesn't exist in the ||(json)|| database"
+    });
 
   delete guilds[id];
 
@@ -442,11 +604,16 @@ async function list(message: GatewayMessageCreateDispatchData) {
     try {
       last = JSON.parse(readFileSync("articles.json", "utf-8"));
     } catch {
-      return writeFileSync("articles.json", JSON.stringify({ time: Date.now() }));
+      return writeFileSync(
+        "articles.json",
+        JSON.stringify({ time: Date.now() })
+      );
     }
 
     writeFileSync("articles.json", JSON.stringify({ time: Date.now() }));
-    const after = articles.filter(({ created_at }) => new Date(created_at).getTime() > last.time);
+    const after = articles.filter(
+      ({ created_at }) => new Date(created_at).getTime() > last.time
+    );
     if (after.length) {
       const data = {
         content: after.map(a => a.html_url).join("\n"),
@@ -467,7 +634,10 @@ async function list(message: GatewayMessageCreateDispatchData) {
             .map(tag =>
               tag
                 .split(/[^\w]/gim)
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .map(
+                  word =>
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                )
                 .join(" ")
             )
             .join(" • ");
