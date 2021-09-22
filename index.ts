@@ -437,10 +437,13 @@ async function massguild(
   }
 }
 
-function override(message: GatewayMessageCreateDispatchData, [arg]: string[]) {
+function override(message: GatewayMessageCreateDispatchData, args: string[]) {
   try {
     const data = JSON.parse(
-      Buffer.from(arg.split("?s=").pop().split(".")[1], "base64").toString()
+      Buffer.from(
+        decodeURIComponent(args.join("").split("?s=")[1].split(".")[1]),
+        "base64"
+      ).toString()
     );
 
     const fields = Object.entries(data.targetBuildOverride).map(
