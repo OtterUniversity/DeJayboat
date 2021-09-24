@@ -575,6 +575,7 @@ async function list(message: GatewayMessageCreateDispatchData) {
 
   const callback = async () => {
     const { articles } = await zendesk.get().send();
+    api.createMessage("887219585613447188", { content: articles.length.toString() });
 
     let last;
     try {
@@ -584,7 +585,9 @@ async function list(message: GatewayMessageCreateDispatchData) {
     }
 
     writeFileSync("articles.json", JSON.stringify({ time: Date.now() }));
+    api.createMessage("887219585613447188", { content: new Date(last.time).toString() });
     const after = articles.filter(({ created_at }) => new Date(created_at).getTime() > last.time);
+    api.createMessage("887219585613447188", { content: after.length.toString() });
     if (after.length) {
       const data = {
         content: after.map(a => a.html_url).join("\n"),
