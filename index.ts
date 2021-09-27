@@ -567,13 +567,13 @@ async function invite(message: GatewayMessageCreateDispatchData, args: string[])
     });
   }
 
-  const invite: APIInvite = await api.getInvite(url.match(inviteRegex)[1], {withCounts: true});
+  const invite: APIInvite = await api.getInvite(RegExp(inviteRegex).exec(url)[1], {withCounts: true});
   const guild: APIPartialGuild = invite.guild;
 
-  if (!guilds[guild.id]) {
+  /*if (!guilds[guild.id]) {
     guilds[guild.id] = guild.name;
     writeFileSync("guilds.json", JSON.stringify(guilds));
-  }
+  }*/
 
   api.createMessage(message.channel_id, {
     embeds: [
