@@ -24,7 +24,7 @@ const snowflakeRegex = /\b\d{17,19}\b/g;
 const color = parseInt("36393f", 16);
 
 // Thanks Geek :) - https://git.io/Jz9RC
-const inviteRegex = /discord(?:app)?\.(?:com|gg)\/(?:invite\/)?(?<code>[\w-]{1,25})/gim;
+const inviteRegex = /discord(?:app)?\.(?:com|gg)\/(?:invite\/)?(?<code>[\w-]{1,25})/;
 
 let guilds = {};
 try {
