@@ -593,8 +593,10 @@ async function invite(message: GatewayMessageCreateDispatchData, args: string[])
             name: "Welcome Channels",
             value: guild.welcome_screen?.welcome_channels?.map(channel => {
               let url = `` //`<#${channel.channel_id}>`
-              if(channel.emoji_name) {
+              if(channel.emoji_id) {
                 url += `<:${channel.emoji_name}:${channel.emoji_id}>`
+              } else if(channel.emoji_name) {
+                url += `${channel.emoji_name}`
               }
               url += ` <#${channel.channel_id}>\n${channel.description}`
               return url
