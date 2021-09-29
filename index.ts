@@ -3,7 +3,7 @@ import * as ottercord from "ottercord";
 import * as robert from "robert";
 import * as fuse from "fuse.js";
 
-import { GatewayMessageCreateDispatchData } from "discord-api-types/v9";
+import { APIInvite, APIPartialGuild, GatewayMessageCreateDispatchData } from "discord-api-types/v9";
 import { writeFileSync, readFileSync } from "fs";
 import { execSync } from "child_process";
 import { Gateway } from "detritus-client-socket";
@@ -22,6 +22,9 @@ const zendesk = robert
 const exactSnowflakeRegex = /^\d{17,19}$/;
 const snowflakeRegex = /\b\d{17,19}\b/g;
 const color = parseInt("36393f", 16);
+
+// Thanks Geek :) - https://git.io/Jz9RC
+const inviteRegex = /discord(?:app)?\.(?:com|gg)\/(?:invite\/)?(?<code>[\w-]{1,25})/;
 
 let guilds = {};
 try {
@@ -160,6 +163,9 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
           {},
           { name: "otter." + otter.headers["x-file-ext"], value: otter.data }
         );
+        break;
+      case "invite":
+        invite(d, args);
         break;
       case "eval":
         if (config.owners.includes(d.author.id)) {
@@ -550,6 +556,63 @@ function del(message: GatewayMessageCreateDispatchData, args: string[]) {
   api.createMessage(message.channel_id, {
     content: "Deleted `" + id + "`",
     allowedMentions: { parse: [] }
+  });
+}
+
+async function invite(message: GatewayMessageCreateDispatchData, args: string[]) {
+  const url = args.shift();
+  if (!inviteRegex.test(url)) {
+    api.createMessage(message.channel_id, {
+      content: "Invalid invite"
+    });
+  }
+
+  const invite: APIInvite = await api.getInvite(RegExp(inviteRegex).exec(url)[1], {withCounts: true});
+  const guild: APIPartialGuild = invite.guild;
+
+  /*if (!guilds[guild.id]) {
+    guilds[guild.id] = guild.name;
+    writeFileSync("guilds.json", JSON.stringify(guilds));
+  }*/
+
+  api.createMessage(message.channel_id, {
+    embeds: [
+      {
+        color,
+        title: guild.name,
+        description: guild.description || "No description",
+        url: `https://discord.gg/${invite.code}`,
+        image: guild.banner ? { url: `https://cdn.discordapp.com/api/banners/${guild.id}/${guild.banner}.png` } : undefined,
+        thumbnail: { url: `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` },
+        fields: [
+          {
+            name: "Welcome Screen",
+            value: guild.welcome_screen?.description || "No welcome screen description provided.",
+          },
+          {
+            name: "Welcome Channels",
+            value: guild.welcome_screen?.welcome_channels?.map(channel => {
+              let url = `` //`<#${channel.channel_id}>`
+              if(channel.emoji_id) {
+                url += `<:${channel.emoji_name}:${channel.emoji_id}>`
+              } else if(channel.emoji_name) {
+                url += `${channel.emoji_name}`
+              }
+              url += ` <#${channel.channel_id}>\n${channel.description}`
+              return url
+            }).join("\n"),
+          },
+          {
+            name: "Features",
+            value: guild.features.join(", ") // apply sentence case
+          },
+          {
+            name: "Verification Level",
+            value: guild.verification_level
+          }
+        ]
+      }
+    ]
   });
 }
 
