@@ -354,7 +354,7 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
     if (status === "🔍 Loading...")
       await api
         .getGuildPreview(id)
-        .then(({ name }) => (guilds[id] = name + "^"))
+        .then(({ name }) => (guilds[id] = name + "*"))
         .catch(() =>
           api
             .getGuildWidget(id)
