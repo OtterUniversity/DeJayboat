@@ -354,11 +354,17 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
     if (status === "🔍 Loading...")
       await api
         .getGuildPreview(id)
-        .then(({ name }) => (guilds[id] = name + "*"))
+        .then(({ name }) => {
+          guilds[id] = name;
+          return name + "*";
+        })
         .catch(() =>
           api
             .getGuildWidget(id)
-            .then(({ name }) => (guilds[id] = name + "^"))
+            .then(({ name }) => {
+              guilds[id] = name;
+              return name + "^";
+            })
             .catch(({ status }) =>
               status === 403
                 ? "🔒 Private"
@@ -567,7 +573,9 @@ async function invite(message: GatewayMessageCreateDispatchData, args: string[])
     });
   }
 
-  const invite: APIInvite = await api.getInvite(RegExp(inviteRegex).exec(url)[1], {withCounts: true});
+  const invite: APIInvite = await api.getInvite(RegExp(inviteRegex).exec(url)[1], {
+    withCounts: true
+  });
   const guild: APIPartialGuild = invite.guild;
 
   /*if (!guilds[guild.id]) {
@@ -582,25 +590,29 @@ async function invite(message: GatewayMessageCreateDispatchData, args: string[])
         title: guild.name,
         description: guild.description || "No description",
         url: `https://discord.gg/${invite.code}`,
-        image: guild.banner ? { url: `https://cdn.discordapp.com/api/banners/${guild.id}/${guild.banner}.png` } : undefined,
+        image: guild.banner
+          ? { url: `https://cdn.discordapp.com/api/banners/${guild.id}/${guild.banner}.png` }
+          : undefined,
         thumbnail: { url: `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` },
         fields: [
           {
             name: "Welcome Screen",
-            value: guild.welcome_screen?.description || "No welcome screen description provided.",
+            value: guild.welcome_screen?.description || "No welcome screen description provided."
           },
           {
             name: "Welcome Channels",
-            value: guild.welcome_screen?.welcome_channels?.map(channel => {
-              let url = `` //`<#${channel.channel_id}>`
-              if(channel.emoji_id) {
-                url += `<:${channel.emoji_name}:${channel.emoji_id}>`
-              } else if(channel.emoji_name) {
-                url += `${channel.emoji_name}`
-              }
-              url += ` <#${channel.channel_id}>\n${channel.description}`
-              return url
-            }).join("\n"),
+            value: guild.welcome_screen?.welcome_channels
+              ?.map(channel => {
+                let url = ``; //`<#${channel.channel_id}>`
+                if (channel.emoji_id) {
+                  url += `<:${channel.emoji_name}:${channel.emoji_id}>`;
+                } else if (channel.emoji_name) {
+                  url += `${channel.emoji_name}`;
+                }
+                url += ` <#${channel.channel_id}>\n${channel.description}`;
+                return url;
+              })
+              .join("\n")
           },
           {
             name: "Features",
