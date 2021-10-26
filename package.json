@@ -15,6 +15,7 @@
     "detritus-client-socket": "^0.8.2",
     "discord-api-types": "^0.22.0",
     "fuse.js": "^6.4.6",
+    "murmurhash": "^2.0.0",
     "ottercord": "^1.0.8",
     "robert": "^2.0.6"
   }
