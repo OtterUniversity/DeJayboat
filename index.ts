@@ -1,4 +1,6 @@
 import * as config from "./config.js";
+
+import * as murmurhash from "murmurhash";
 import * as ottercord from "ottercord";
 import * as robert from "robert";
 import * as fuse from "fuse.js";
@@ -9,7 +11,6 @@ import { execSync } from "child_process";
 import { Gateway } from "detritus-client-socket";
 import { inspect } from "util";
 import { load } from "cheerio";
-const murmurhash = require("murmurhash");
 
 const ws = new Gateway.Socket(config.token);
 const api = ottercord(config.token);
@@ -137,7 +138,7 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
         break;
       case "help":
         let help =
-          "👌 You can use: `massuser`, `massguild`, `override`, `search`, `set`, `delete`, `list`, `help`, `ping`, `otter`";
+          "👌 You can use: `massuser`, `massguild`, `experiment`, `override`, `search`, `set`, `delete`, `list`, `help`, `ping`, `otter`";
         if (config.owners.includes(d.author.id)) help += ", `eval`, `exec`, `update`";
         api.createMessage(d.channel_id, {
           content: help
@@ -277,7 +278,7 @@ function checkRolloutInBucket(exp, rollout: number, id: string) {
 
 async function experiment(message: GatewayMessageCreateDispatchData, args: string[]) {
   let hashed = args[0];
-  if (hashed.includes("-")) hashed = murmurhash.v3(hashed);
+  if (hashed.includes("-")) hashed = murmurhash.v3(hashed).toString();
 
   const data = await robert
     .get("https://discord-services.justsomederpyst.repl.co/experiment")
