@@ -9,6 +9,7 @@ import { execSync } from "child_process";
 import { Gateway } from "detritus-client-socket";
 import { inspect } from "util";
 import { load } from "cheerio";
+const murmurhash = require('murmurhash')
 
 const ws = new Gateway.Socket(config.token);
 const api = ottercord(config.token);
@@ -109,6 +110,9 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
     const command = args.shift();
 
     switch (command) {
+      case "experiment":
+        experimentlookup(d, args)
+        break;
       case "massuser":
         massuser(d, args);
         break;
@@ -249,6 +253,101 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
     }
   }
 });
+
+function checkIdInOverrides(exp, id){
+  let treatment = -1;
+  Object.keys(exp.overrides).forEach(function(o){
+    if(exp.overrides[o].includes(id)){treatment = parseInt(o)}
+  })
+  return treatment
+}
+
+function checkRolloutInBucket(exp, rollout, id){
+  let treatment = -1;
+  exp.populations.forEach(function(a){
+    Object.keys(a.buckets).forEach(function(b){
+      a.buckets[b].rollout.forEach(function(r){
+        if(rollout >= r.min && rollout <= r.max){ 
+          treatment = parseInt(b) 
+        }
+      })
+    })
+    a.filters.forEach(function(f){
+      if(f.type == "guild_id_range"){
+        if(parseInt(id) <= parseInt(f.min_id) || parseInt(id) >= parseInt(f.max_id)){
+          treatment = 0
+        }
+      }
+    })
+  })
+  return treatment
+}
+
+async function experimentlookup(message: GatewayMessageCreateDispatchData, args: string[]) {
+  //get experiments
+  let hashed = args[0];
+  if(hashed.includes('-')){
+    hashed = murmurhash.v3(hashed) //get the murmur3
+  }
+  //`${hashed}:${gid}` % 1e4 
+  //store exp data
+  let expdata;
+  await robert
+    .get("https://discord-services.justsomederpyst.repl.co/experiment/")
+    .header("user-agent", "dejayboat/1.0")
+    .send("json")
+    .then(value => 
+      expdata = value
+    )
+    .catch(() => {});
+  if(!expdata[hashed]){
+    return api.createMessage(message.channel_id, {
+      content: "⛔ Unknown guild experiment"
+    });
+  }
+  let experiment = expdata[hashed]
+  //look them up
+  let found = [];
+  for await (const id of Object.keys(guilds)) {
+    let or = 0
+    if(args[1] !== '-no'){
+      or = checkIdInOverrides(experiment, id)
+    }
+    if(or >= 1){
+      found.push(`\`${or}\` \`${id}\` ${guilds[id]}*`)
+    } else { //doesnt have an override
+      let range = murmurhash.v3(`${hashed}:${id}`) % 1e4 
+      let bucket = checkRolloutInBucket(experiment, range, id)
+      if(bucket >= 1){
+        found.push(`\`${bucket}\` \`${id}\` ${guilds[id]}`)
+      }
+    }
+  }
+  if(found.length >= 1){
+    let description = found.join('\n').substr(0,4000)
+    let title = "🧪 Guild Experiment Lookup"
+    return api.createMessage(message.channel_id, {
+      content: "",
+        embeds: [
+          {
+            color,
+            description,
+            title,
+            footer: {
+              text: "* = Override"
+            }
+          }
+        ]
+      }
+    );
+  } else {
+    return api.createMessage(message.channel_id, {
+      content: "⛔ No guild found"
+    });
+  }
+
+  //console.log(message, args)
+}
 
 async function massuser(message: GatewayMessageCreateDispatchData, args: string[]) {
   let input = args.join(" ");
