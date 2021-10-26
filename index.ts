@@ -9,7 +9,7 @@ import { execSync } from "child_process";
 import { Gateway } from "detritus-client-socket";
 import { inspect } from "util";
 import { load } from "cheerio";
-const murmurhash = require('murmurhash')
+const murmurhash = require("murmurhash");
 
 const ws = new Gateway.Socket(config.token);
 const api = ottercord(config.token);
@@ -111,7 +111,7 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
 
     switch (command) {
       case "experiment":
-        experimentlookup(d, args)
+        experiment(d, args);
         break;
       case "massuser":
         massuser(d, args);
@@ -254,99 +254,61 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
   }
 });
 
-function checkIdInOverrides(exp, id){
-  let treatment = -1;
-  Object.keys(exp.overrides).forEach(function(o){
-    if(exp.overrides[o].includes(id)){treatment = parseInt(o)}
-  })
-  return treatment
+function checkRolloutInBucket(exp, rollout: number, id: string) {
+  let treatment = 0;
+  exp.populations.forEach(a => {
+    Object.keys(a.buckets).forEach(b => {
+      a.buckets[b].rollout.forEach(r => {
+        if (rollout >= r.min && rollout <= r.max) treatment = parseInt(b);
+      });
+    });
+
+    a.filters.forEach(f => {
+      if (
+        f.type == "guild_id_range" &&
+        (BigInt(id) <= BigInt(f.min_id) || BigInt(id) >= BigInt(f.max_id))
+      )
+        treatment = 0;
+    });
+  });
+
+  return treatment;
 }
 
-function checkRolloutInBucket(exp, rollout, id){
-  let treatment = -1;
-  exp.populations.forEach(function(a){
-    Object.keys(a.buckets).forEach(function(b){
-      a.buckets[b].rollout.forEach(function(r){
-        if(rollout >= r.min && rollout <= r.max){ 
-          treatment = parseInt(b) 
-        }
-      })
-    })
-    a.filters.forEach(function(f){
-      if(f.type == "guild_id_range"){
-        if(parseInt(id) <= parseInt(f.min_id) || parseInt(id) >= parseInt(f.max_id)){
-          treatment = 0
-        }
-      }
-    })
-  })
-  return treatment
-}
-
-async function experimentlookup(message: GatewayMessageCreateDispatchData, args: string[]) {
-  //get experiments
+async function experiment(message: GatewayMessageCreateDispatchData, args: string[]) {
   let hashed = args[0];
-  if(hashed.includes('-')){
-    hashed = murmurhash.v3(hashed) //get the murmur3
-  }
-  //`${hashed}:${gid}` % 1e4 
-  //store exp data
-  let expdata;
-  await robert
-    .get("https://discord-services.justsomederpyst.repl.co/experiment/")
-    .header("user-agent", "dejayboat/1.0")
+  if (hashed.includes("-")) hashed = murmurhash.v3(hashed);
+
+  const data = await robert
+    .get("https://discord-services.justsomederpyst.repl.co/experiment")
+    .query("with_metadata", true)
+    .agent("dejayboat/1.0")
     .send("json")
-    .then(value => 
-      expdata = value
-    )
     .catch(() => {});
-  if(!expdata[hashed]){
-    return api.createMessage(message.channel_id, {
-      content: "⛔ Unknown guild experiment"
-    });
-  }
-  let experiment = expdata[hashed]
-  //look them up
-  let found = [];
-  for await (const id of Object.keys(guilds)) {
-    let or = 0
-    if(args[1] !== '-no'){
-      or = checkIdInOverrides(experiment, id)
-    }
-    if(or >= 1){
-      found.push(`\`${or}\` \`${id}\` ${guilds[id]}*`)
-    } else { //doesnt have an override
-      let range = murmurhash.v3(`${hashed}:${id}`) % 1e4 
-      let bucket = checkRolloutInBucket(experiment, range, id)
-      if(bucket >= 1){
-        found.push(`\`${bucket}\` \`${id}\` ${guilds[id]}`)
+
+  if (!data[hashed])
+    return api.createMessage(message.channel_id, { content: "⛔ Unknown guild experiment" });
+
+  const exp = data[hashed];
+  const treatments: Record<string, number> = {};
+  let ids: string[] = [];
+
+  const no = args.includes("-n") || args.includes("--no");
+  if (!no) ids = Object.values(exp.overrides).flat() as string[];
+
+  const yes = args.includes("-y") || args.includes("--yes");
+  if (!yes) {
+    for await (const id of Object.keys(guilds)) {
+      const range = murmurhash.v3(`${hashed}:${id}`) % 1e4;
+      const treatment = checkRolloutInBucket(exp, range, id);
+      if (treatment > 0) {
+        treatments[id] = treatment;
+        ids.push(id);
       }
     }
-  }
-  if(found.length >= 1){
-    let description = found.join('\n').substr(0,4000)
-    let title = "🧪 Guild Experiment Lookup"
-    return api.createMessage(message.channel_id, {
-      content: "",
-        embeds: [
-          {
-            color,
-            description,
-            title,
-            footer: {
-              text: "* = Override"
-            }
-          }
-        ]
-      }
-    );
-  } else {
-    return api.createMessage(message.channel_id, {
-      content: "⛔ No guild found"
-    });
   }
 
-  //console.log(message, args)
+  massguild(message, ids, treatments);
 }
 
 async function massuser(message: GatewayMessageCreateDispatchData, args: string[]) {
@@ -424,7 +386,11 @@ async function massuser(message: GatewayMessageCreateDispatchData, args: string[
   }
 }
 
-async function massguild(message: GatewayMessageCreateDispatchData, args: string[]) {
+async function massguild(
+  message: GatewayMessageCreateDispatchData,
+  args: string[],
+  treatments: Record<string, number> = {}
+) {
   let input = args.join(" ");
   let performance = args.includes("-f") || args.includes("--fast");
   if (!input) {
@@ -440,6 +406,7 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
   const ids = new Map(
     input.match(snowflakeRegex)?.map(key => [key, guilds[key] ?? "🔍 Loading..."])
   );
+
   if (!ids.size) return api.createMessage(message.channel_id, { content: "No IDs found" });
   if ([...ids.values()].filter(value => value === "🔍 Loading...").length > 1000)
     return api.createMessage(message.channel_id, {
@@ -449,6 +416,7 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
   const pending = await api.createMessage(message.channel_id, {
     content: "🔍 Loading..."
   });
+
   for await (const [id, status] of ids.entries()) {
     if (status === "🔍 Loading...")
       await api
@@ -478,7 +446,10 @@ async function massguild(message: GatewayMessageCreateDispatchData, args: string
     let description = "";
     ids.forEach((value, key) => {
       if (value !== "🔍 Loading...") completed++;
-      description += "`" + key + "` " + value + "\n";
+      description += "`" + key + "` " + value;
+      const treatment = treatments[key];
+      if (treatment) description += " (" + treatment + ")";
+      description += "\n";
     });
 
     const percent = Math.round((completed / ids.size) * 10);
@@ -764,8 +735,8 @@ async function list(message: GatewayMessageCreateDispatchData) {
       const data = {
         content: after.map(a => a.html_url).join("\n"),
         embeds: after.map(a => {
-          const section = sections[a.section_id];
-          const category = categories[section.category_id];
+          const section = sections[a.section_id] ?? "Unknown";
+          const category = categories[section.category_id] ?? "Unknown";
 
           const html = load(a.body);
           const image = html("img")[0]?.attribs.src;
