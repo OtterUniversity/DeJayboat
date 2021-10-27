@@ -11,7 +11,7 @@ const ws = new Gateway.Socket(config.token);
 const api = ottercord(config.token);
 
 ws.on("ready", () => {
-  if (shutdown.time && shutdown.channel && shutdown.message && Date.now() - shutdown.time > 60000)
+  if (shutdown.time && shutdown.channel && shutdown.message && Date.now() - shutdown.time < 60000)
     api.editMessage(shutdown.channel, shutdown.message, { content: "🟢 Online" });
 });
 

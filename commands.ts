@@ -23,6 +23,7 @@ export {
   massguild,
   massuser,
   otter,
+  otter as botter,
   otter as imgoingfuckinginsanewhydidyoutellmetomakeanottercommand,
   ping,
   search,
