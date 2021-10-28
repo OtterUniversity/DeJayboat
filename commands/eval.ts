@@ -3,7 +3,7 @@ import { inspect } from "util";
 import { owners } from "../config";
 
 export default async function ({ message, args, api }: Context) {
-  if (owners.includes(message.author.id)) return;
+  if (!owners.includes(message.author.id)) return;
   try {
     let res = eval(args.join(" "));
     if (res instanceof Promise) {
