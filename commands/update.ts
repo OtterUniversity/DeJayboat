@@ -1,29 +1,33 @@
+import { execSync as exec } from "child_process";
 import { updateShutdown } from "../store";
-import { execSync } from "child_process";
 import { Context } from "../util";
 import { owners } from "../config";
 
 export default async function ({ message, api }: Context) {
-  if (owners.includes(message.author.id)) {
-    const updateMessage = await api.createMessage(message.channel_id, {
-      content: "Pulling from GitHub"
-    });
-    execSync("git pull");
+  if (!owners.includes(message.author.id)) return;
+  const updateMessage = await api.createMessage(message.channel_id, {
+    content: "Pulling from GitHub"
+  });
 
-    await api.editMessage(message.channel_id, updateMessage.id, {
-      content: "Installing dependencies"
-    });
+  exec("git pull");
 
-    execSync("npm install");
+  await api.editMessage(message.channel_id, updateMessage.id, {
+    content: "Installing dependencies"
+  });
 
-    await api.editMessage(message.channel_id, updateMessage.id, {
-      content: "Compiling typescript"
-    });
-    execSync("npm run build");
+  exec("npm install");
 
-    await api.editMessage(message.channel_id, updateMessage.id, { content: "Exiting process" });
-    updateShutdown({ channel: message.channel_id, message: message.id, time: Date.now() });
+  await api.editMessage(message.channel_id, updateMessage.id, {
+    content: "Compiling typescript"
+  });
+  exec("npm run build");
 
-    process.exit();
-  }
+  await api.editMessage(message.channel_id, updateMessage.id, { content: "Exiting process" });
+  updateShutdown({
+    channel: updateMessage.channel_id,
+    message: updateMessage.id,
+    time: Date.now()
+  });
+
+  process.exit();
 }
