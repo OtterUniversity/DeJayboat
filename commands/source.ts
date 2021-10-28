@@ -15,7 +15,7 @@ export default function ({ message, api }: Context) {
   else if (message.author.username.toLowerCase().includes("tiemen"))
     content =
       "why the fuck did you change your actual discord name this it isn't even funny, well heres the source";
-  else if (message.member.nick.toLowerCase().includes("tiemen"))
+  else if (message.member.nick?.toLowerCase().includes("tiemen"))
     content = "i dont know who the fuck you are but you look kinda like tiemen so here you go";
   else content = "sorry i dont have a funny message for you but heres the source";
 
