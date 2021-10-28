@@ -1,3 +1,4 @@
+import * as commands from "./commands";
 import * as config from "./config.js";
 import * as ottercord from "ottercord";
 import * as robert from "robert";
@@ -5,7 +6,6 @@ import * as robert from "robert";
 import { GatewayMessageCreateDispatchData } from "discord-api-types/v9";
 import { shutdown } from "./store.js";
 import { Gateway } from "detritus-client-socket";
-import * as commands from "./commands";
 
 const ws = new Gateway.Socket(config.token);
 const api = ottercord(config.token);
