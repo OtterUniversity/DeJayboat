@@ -12,7 +12,7 @@ export default function ({ message, api }: Context) {
     content = "its not a security issue tho here's the source";
   else if (message.author.id === "128296384200835073")
     content = "the dog would like to see the github repository of mmm code here you go sir";
-  else if (message.member.user.username.toLowerCase().includes("tiemen"))
+  else if (message.author.username.toLowerCase().includes("tiemen"))
     content =
       "why the fuck did you change your actual discord name this it isn't even funny, well heres the source";
   else if (message.member.nick.toLowerCase().includes("tiemen"))
