@@ -9,7 +9,7 @@ export default async function ({ message, api }: Context) {
     const id = run.toString();
     if (!unique.has(id)) {
       unique.add(id);
-      content += "\n`" + command + "`";
+      content += "\n> `" + command + "`";
     }
   }
 
