@@ -10,6 +10,7 @@ import otter from "./commands/otter";
 import ping from "./commands/ping";
 import search from "./commands/search";
 import set from "./commands/set";
+import source from "./commands/source";
 import update from "./commands/update";
 
 export {
@@ -28,5 +29,6 @@ export {
   ping,
   search,
   set,
+  source,
   update
 };
