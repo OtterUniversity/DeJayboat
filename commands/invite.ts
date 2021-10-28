@@ -41,7 +41,7 @@ export default async function ({ message, args, api }: Context) {
           },
           {
             name: "Welcome Screen",
-            value: guild.welcome_screen?.description || "No welcome screen description provided."
+            value: guild.welcome_screen?.description || "No welcome screen"
           },
           {
             name: "Inviter",
@@ -59,14 +59,15 @@ export default async function ({ message, args, api }: Context) {
           },
           {
             name: "Welcome Channels",
-            value: guild.welcome_screen?.welcome_channels
-              ?.map(channel => {
-                let res = "";
-                if (channel.emoji_name && !channel.emoji_id) res += channel.emoji_name + " ";
-                res += `<#${channel.channel_id}> (\`${channel.channel_id}\`)\n> ${channel.description}`;
-                return res;
-              })
-              .join("\n")
+            value:
+              guild.welcome_screen?.welcome_channels
+                ?.map(channel => {
+                  let res = "";
+                  if (channel.emoji_name && !channel.emoji_id) res += channel.emoji_name + " ";
+                  res += `<#${channel.channel_id}> (\`${channel.channel_id}\`)\n> ${channel.description}`;
+                  return res;
+                })
+                .join("\n") || "No welcome channels"
           },
           {
             name: "Features",
