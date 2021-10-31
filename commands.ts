@@ -1,6 +1,7 @@
 import _delete from "./commands/delete";
 import eval from "./commands/eval";
 import exec from "./commands/exec";
+import fix from "./commands/fix";
 import help from "./commands/help";
 import invite from "./commands/invite";
 import list from "./commands/list";
@@ -18,6 +19,7 @@ export {
   _delete as del,
   eval,
   exec,
+  fix,
   help,
   invite,
   list,

@@ -1,6 +1,6 @@
-import { APIInvite, APIPartialGuild } from "discord-api-types";
-import { guilds, updateGuilds } from "../store";
 import { Context, inviteRegex, color } from "../util";
+import { guilds, updateGuilds } from "../store";
+import { APIInvite } from "discord-api-types";
 
 export default async function ({ message, args, api }: Context) {
   const url = args.join(" ");
