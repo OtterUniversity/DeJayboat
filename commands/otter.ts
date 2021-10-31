@@ -2,7 +2,6 @@ import { Context } from "../util";
 import * as robert from "robert";
 
 export default async function ({ message, args, api }: Context) {
-  const files = [];
   let amount = 1;
   if (args[0]) {
     amount = Math.round(parseInt(args[0]));
@@ -14,10 +13,28 @@ export default async function ({ message, args, api }: Context) {
       return api.createMessage(message.channel_id, { content: "Amount over maximum" });
   }
 
+  const { id } = await api.createMessage(message.channel_id, { content: "🦦 Loading..." });
   for (let i = 0; i < amount; i++) {
     const otter = await robert.get("https://otter.bruhmomentlol.repl.co/random").send();
-    files.push({ name: "otter" + i + "." + otter.headers["x-file-ext"], value: otter });
-  }
+    const ext = otter.headers["x-file-ext"];
 
-  api.createMessage(message.channel_id, { content: "🦦" }, files);
+    const completed = i + 1;
+    const percent = Math.round((completed / amount) * 10);
+    api.editMessage(
+      message.channel_id,
+      id,
+      {
+        content:
+          "(`" +
+          completed +
+          "/" +
+          amount +
+          "`) [" +
+          "🦦".repeat(percent) +
+          "🐟".repeat(10 - percent) +
+          "] "
+      },
+      { name: "otter" + completed + "." + ext, value: otter }
+    );
+  }
 }
