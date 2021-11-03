@@ -79,17 +79,17 @@ export default async function ({ message, args, api }: Context) {
           return name + "*";
         })
         .catch(() =>
-          api
-            .getGuildWidget(id)
+          get("https://discordapp.com/api/v9/guilds/" + id + "/widget.json")
+            .send("json")
             .then(({ name }) => {
               guilds[id] = name;
               return name + "^";
             })
-            .catch(({ status }) =>
-              status === 403
+            .catch(({ message }) =>
+              message.includes("403")
                 ? "🔒 Private"
-                : status === 429
-                ? "🕓 Widget Ratelimited"
+                : message.includes("429")
+                ? "🕓 Ratelimited"
                 : "⛔ Invalid Guild"
             )
         )
