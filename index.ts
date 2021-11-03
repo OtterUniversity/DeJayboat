@@ -75,7 +75,7 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
     }
 
     if (!d.content.startsWith(config.prefix)) return;
-    const args = d.content.slice(config.prefix.length).split(/ +/);
+    const args = d.content.slice(config.prefix.length).trim().split(/ +/);
     const command = args.shift();
 
     const run = commands[command];
