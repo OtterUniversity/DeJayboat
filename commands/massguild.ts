@@ -85,12 +85,8 @@ export default async function ({ message, args, api }: Context) {
               guilds[id] = name;
               return name + "^";
             })
-            .catch(({ message }) =>
-              message.includes("403")
-                ? "🔒 Private"
-                : message.includes("429")
-                ? "🕓 Ratelimited"
-                : "⛔ Invalid Guild"
+            .catch(({ status }) =>
+              status === 403 ? "🔒 Private" : status == 429 ? "🕓 Ratelimited" : "⛔ Invalid Guild"
             )
         )
         .then(value => ids.set(id, value));
