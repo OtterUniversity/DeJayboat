@@ -79,7 +79,7 @@ export default async function ({ message, args, api }: Context) {
           return name + "*";
         })
         .catch(() =>
-          get("https://discordapp.com/api/v9/guilds/" + id + "/widget.json")
+          get("https://832025993019260929.discordsays.com/api/v9/guilds/" + id + "/widget.json")
             .send("json")
             .then(({ name }) => {
               guilds[id] = name;
