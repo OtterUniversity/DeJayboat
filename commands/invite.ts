@@ -3,16 +3,24 @@ import { guilds, updateGuilds } from "../store";
 import { APIInvite } from "discord-api-types";
 
 export default async function ({ message, args, api }: Context) {
-  const url = args.join(" ");
+  let url = args.join(" ");
+  if (!url) return api.createMessage(message.channel_id, { content: "No invite specified" });
+  if (/^\w{2,32}$/.test(url)) url = "discord.gg/" + url;
   if (!inviteRegex.test(url))
     return api.createMessage(message.channel_id, {
       content: "Invalid invite"
     });
 
   const code = inviteRegex.exec(url)[1];
-  const invite: APIInvite = await api.getInvite(code, {
-    withCounts: true
-  });
+  let invite: APIInvite;
+
+  try {
+    invite = await api.getInvite(code, {
+      withCounts: true
+    });
+  } catch {
+    return api.createMessage(message.channel_id, { content: "Invalid invite" });
+  }
 
   const { guild } = invite;
   if (!guilds[guild.id]) {
