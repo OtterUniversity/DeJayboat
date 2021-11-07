@@ -1,3 +1,5 @@
 config.ts
 node_modules/
 build/
+
+commands/fuck.ts
