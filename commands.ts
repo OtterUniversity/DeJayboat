@@ -9,6 +9,7 @@ import list from "./commands/list";
 import massguild from "./commands/massguild";
 import massuser from "./commands/massuser";
 import otter from "./commands/otter";
+import override from "./commands/override";
 import ping from "./commands/ping";
 import search from "./commands/search";
 import set from "./commands/set";
@@ -30,6 +31,7 @@ export {
   otter,
   otter as botter,
   otter as imgoingfuckinginsanewhydidyoutellmetomakeanottercommand,
+  override,
   ping,
   search,
   set,
