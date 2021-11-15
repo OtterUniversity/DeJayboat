@@ -1,14 +1,16 @@
 import { lstatSync, readFileSync, readdirSync, writeFileSync } from "fs";
-import { resolve, basename } from "path";
+import { resolve, dirname, basename } from "path";
 import { Context, color } from "../util";
 import { owners } from "../config";
 import { get } from "robert";
+
+const base = dirname(__dirname);
 
 export default async function ({ message, args, api }: Context) {
   if (!owners.includes(message.author.id)) return;
   if (!args.length) return api.createMessage(message.channel_id, { content: "No path specified" });
 
-  const path = resolve(args.join(" "));
+  const path = resolve(base, args.join(" "));
 
   let meta: ReturnType<typeof lstatSync>;
   try {

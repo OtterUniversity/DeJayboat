@@ -6,7 +6,7 @@ const to = "(webpackChunkdiscord_app.push([[''],{},e=>{m=[];for(let c in e.c)m.p
 export default function ({ message, args, api }: Context) {
   if (!args.length) return api.createMessage(message.channel_id, { content: "no snippet to fix" });
 
-  const snippet = args.join("");
+  const snippet = args.join(" ");
   const fixed = snippet.replace(from, to);
   if (snippet === fixed) return api.createMessage(message.channel_id, { content: "no fix found" });
 
