@@ -18,5 +18,8 @@
     "murmurhash": "^2.0.0",
     "ottercord": "^1.0.8",
     "robert": "^2.0.6"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.7"
   }
 }

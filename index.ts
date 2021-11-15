@@ -1,11 +1,12 @@
 import * as commands from "./commands";
-import * as config from "./config.js";
+import * as config from "./config";
 import * as ottercord from "ottercord";
 import * as robert from "robert";
 
 import { GatewayMessageCreateDispatchData } from "discord-api-types/v9";
 import { shutdown } from "./store.js";
 import { Gateway } from "detritus-client-socket";
+import articles from "./articles";
 
 const ws = new Gateway.Socket(config.token);
 const api = ottercord(config.token);
@@ -89,3 +90,5 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
 });
 
 ws.connect("wss://gateway.discord.gg");
+
+articles(api);
