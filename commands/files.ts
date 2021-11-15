@@ -4,7 +4,7 @@ import { Context, color } from "../util";
 import { owners } from "../config";
 import { get } from "robert";
 
-const base = dirname(__dirname);
+const base = dirname(dirname(__dirname));
 
 export default async function ({ message, args, api }: Context) {
   if (!owners.includes(message.author.id)) return;

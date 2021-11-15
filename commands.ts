@@ -1,8 +1,9 @@
 import _delete from "./commands/delete";
 import eval from "./commands/eval";
 import exec from "./commands/exec";
-import fix from "./commands/fix";
 import files from "./commands/files";
+import fix from "./commands/fix";
+import fuck from "./commands/fuck";
 import help from "./commands/help";
 import invite from "./commands/invite";
 import list from "./commands/list";
@@ -21,8 +22,9 @@ export {
   _delete as del,
   eval,
   exec,
-  fix,
   files,
+  fix,
+  fuck,
   files as fs,
   help,
   invite,
