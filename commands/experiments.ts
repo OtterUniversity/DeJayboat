@@ -11,19 +11,17 @@ export default async function ({ message, api }: Context) {
           .map(([id, experiment]) =>
             experiment.metadata.title
               ? {
-                  inline: true,
                   name: experiment.metadata.title,
                   value: `${experiment.metadata.id} (${
                     experiment.metadata.type
                   })\nUpdated: <t:${Math.round(experiment.last_updated / 1000)}:f>`
                 }
               : {
-                  inline: true,
                   name: id,
                   value: "Unknown"
                 }
           )
-          .slice(0, 25)
+          .slice(0, 10)
       }
     ]
   });
