@@ -6,15 +6,23 @@ export default async function ({ message, api }: Context) {
     embeds: [
       {
         color,
-        title: "Experiments",
-        fields: Object.values(experiments)
-          .map(experiment => ({
-            inline: true,
-            name: experiment.meta?.title ?? "Unknown",
-            value: `${experiment.id} (${experiment.type})\nUpdated: <t:${
-              experiment.last_updated / 1000
-            }:f>`
-          }))
+        title: "🧪 Experiments",
+        fields: Object.entries(experiments)
+          .map(([id, experiment]) =>
+            experiment.metadata
+              ? {
+                  inline: true,
+                  name: experiment.metadata.title,
+                  value: `${experiment.metadata.id} (${
+                    experiment.metadata.type
+                  })\nUpdated: <t:${Math.round(experiment.last_updated / 1000)}:f>`
+                }
+              : {
+                  inline: true,
+                  name: "Unknown",
+                  value: id
+                }
+          )
           .slice(0, 25)
       }
     ]
