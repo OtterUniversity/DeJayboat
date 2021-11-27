@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sapphire/snowflake": "^2.1.4",
     "cheerio": "^1.0.0-rc.10",
     "detritus-client-socket": "^0.8.2",
     "discord-api-types": "^0.22.0",

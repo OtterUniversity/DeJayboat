@@ -16,19 +16,19 @@ export default async function ({ message, args, api }: Context) {
         color,
         title: "🧪 Experiments",
         fields: Object.entries(experiments)
-          .map(([id, experiment]) =>
-            experiment.metadata.title
+          .map(([id, experiment]) => {
+            const seconds = Math.round(experiment.last_updated / 1000);
+            const timestamp = "<t:" + seconds + ":f><t:" + seconds + ":R>";
+            return experiment.metadata.title
               ? {
                   name: experiment.metadata.title,
-                  value: `${experiment.metadata.id} (${
-                    experiment.metadata.type
-                  })\nUpdated: <t:${Math.round(experiment.last_updated / 1000)}:f>`
+                  value: `${experiment.metadata.id} (${experiment.metadata.type})\nUpdated: ${timestamp}`
                 }
               : {
                   name: id,
-                  value: "Unknown"
-                }
-          )
+                  value: `Unknown\nUpdated: ${timestamp}`
+                };
+          })
           .slice(10 * page - 10, 10 * page),
         footer: {
           text: "Page " + page + " of 5"

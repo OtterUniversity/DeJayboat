@@ -15,6 +15,7 @@ import override from "./commands/override";
 import ping from "./commands/ping";
 import search from "./commands/search";
 import set from "./commands/set";
+import snowflake from "./commands/snowflake";
 import source from "./commands/source";
 import update from "./commands/update";
 import webhooks from "./commands/webhooks";
@@ -42,6 +43,9 @@ export {
   ping,
   search,
   set,
+  snowflake,
+  snowflake as type,
+  snowflake as typeof,
   source,
   update,
   webhooks,
