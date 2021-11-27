@@ -29,7 +29,10 @@ export default async function ({ message, args, api }: Context) {
                   value: "Unknown"
                 }
           )
-          .slice(10 * page - 10, 10 * page)
+          .slice(10 * page - 10, 10 * page),
+        footer: {
+          text: "Page " + page + " of 5"
+        }
       }
     ]
   });
