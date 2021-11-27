@@ -23,7 +23,7 @@ export default async function ({ message, api }: Context) {
                   value: "Unknown"
                 }
           )
-          .slice(0, 5)
+          .slice(0, 25)
       }
     ]
   });
