@@ -1,7 +1,15 @@
 import { color, Context, fetchExperiments } from "../util";
 
-export default async function ({ message, api }: Context) {
+export default async function ({ message, args, api }: Context) {
   const experiments = await fetchExperiments();
+
+  let page = 1;
+  if (args[0]) {
+    page = Math.round(parseInt(args[0]));
+    if (!page || page < 1 || page > 5)
+      return api.createMessage(message.channel_id, { content: "Invalid page" });
+  }
+
   await api.createMessage(message.channel_id, {
     embeds: [
       {
@@ -21,7 +29,7 @@ export default async function ({ message, api }: Context) {
                   value: "Unknown"
                 }
           )
-          .slice(0, 10)
+          .slice(10 * page - 10, 10 * page)
       }
     ]
   });
