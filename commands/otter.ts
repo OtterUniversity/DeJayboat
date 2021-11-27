@@ -1,5 +1,5 @@
 import { Context } from "../util";
-import * as robert from "robert";
+import { get } from "robert";
 
 export default async function ({ message, args, api }: Context) {
   let amount = 1;
@@ -15,7 +15,7 @@ export default async function ({ message, args, api }: Context) {
 
   const { id } = await api.createMessage(message.channel_id, { content: "🦦 Loading..." });
   for (let i = 0; i < amount; i++) {
-    const otter = await robert.get("https://otter.bruhmomentlol.repl.co/random").send();
+    const otter = await get("https://otter.bruhmomentlol.repl.co/random").send();
     const ext = otter.headers["x-file-ext"];
 
     const completed = i + 1;

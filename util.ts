@@ -23,7 +23,7 @@ export interface Context extends Client {
   args?: string[];
 }
 
-export function fetchExperiments() {
+export function fetchExperiments(): Promise<Record<string, any>> {
   return robert
     .get("https://discord-services.justsomederpyst.repl.co/experiment")
     .query("with_metadata", true)

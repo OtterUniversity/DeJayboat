@@ -16,6 +16,7 @@ import search from "./commands/search";
 import set from "./commands/set";
 import source from "./commands/source";
 import update from "./commands/update";
+import webhooks from "./commands/webhooks";
 
 export {
   _delete as delete,
@@ -24,6 +25,7 @@ export {
   exec,
   files,
   fix,
+  fix as webpack,
   fuck,
   files as fs,
   help,
@@ -39,5 +41,7 @@ export {
   search,
   set,
   source,
-  update
+  update,
+  webhooks,
+  webhooks as find
 };
