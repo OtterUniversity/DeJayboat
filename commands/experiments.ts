@@ -2,7 +2,7 @@ import { color, Context, fetchExperiments } from "../util";
 
 export default async function ({ message, api }: Context) {
   const experiments = await fetchExperiments();
-  api.createMessage(message.channel_id, {
+  return api.createMessage(message.channel_id, {
     embeds: [
       {
         color,
