@@ -1,6 +1,7 @@
 import _delete from "./commands/delete";
 import eval from "./commands/eval";
 import exec from "./commands/exec";
+import experiments from "./commands/experiments";
 import files from "./commands/files";
 import fix from "./commands/fix";
 import fuck from "./commands/fuck";
@@ -23,6 +24,7 @@ export {
   _delete as del,
   eval,
   exec,
+  experiments,
   files,
   fix,
   fix as webpack,
