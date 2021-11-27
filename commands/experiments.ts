@@ -2,14 +2,14 @@ import { color, Context, fetchExperiments } from "../util";
 
 export default async function ({ message, api }: Context) {
   const experiments = await fetchExperiments();
-  return api.createMessage(message.channel_id, {
+  await api.createMessage(message.channel_id, {
     embeds: [
       {
         color,
         title: "🧪 Experiments",
         fields: Object.entries(experiments)
           .map(([id, experiment]) =>
-            experiment.metadata
+            experiment.metadata.title
               ? {
                   inline: true,
                   name: experiment.metadata.title,
@@ -19,11 +19,11 @@ export default async function ({ message, api }: Context) {
                 }
               : {
                   inline: true,
-                  name: "Unknown",
-                  value: id
+                  name: id,
+                  value: "Unknown"
                 }
           )
-          .slice(0, 25)
+          .slice(0, 5)
       }
     ]
   });
