@@ -46,6 +46,7 @@ export {
   snowflake,
   snowflake as type,
   snowflake as typeof,
+  snowflake as instanceof,
   source,
   update,
   webhooks,
