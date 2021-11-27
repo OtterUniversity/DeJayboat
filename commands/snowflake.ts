@@ -50,7 +50,7 @@ export default async function ({ message, args, api }: Context) {
   const [snowflake] = args;
   if (!snowflake) return api.createMessage(message.channel_id, { content: "No snowflake" });
   if (!exactSnowflakeRegex.test(snowflake))
-    api.createMessage(message.channel_id, { content: "Invalid snowflake" });
+    return api.createMessage(message.channel_id, { content: "Invalid snowflake" });
 
   const data = Snowflake.deconstruct(snowflake);
   const seconds = Math.round(Number(data.timestamp) / 1000);
