@@ -84,7 +84,13 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
       if (!d.member.roles.includes(config.role) && !config.owners.includes(d.author.id))
         return api.createMessage(d.channel_id, { content: "👽 Missing permissions" });
 
-      run({ message: d, args, api, ws });
+      try {
+        await run({ message: d, args, api, ws });
+      } catch (e) {
+        api.createMessage(d.channel_id, {
+          content: "<@296776625432035328> it broke\n```js\n" + e.message + "\n" + e.stack + "```"
+        });
+      }
     }
   }
 });

@@ -1,6 +1,7 @@
 import _delete from "./commands/delete";
 import eval from "./commands/eval";
 import exec from "./commands/exec";
+import experiments from "./commands/experiments";
 import files from "./commands/files";
 import fix from "./commands/fix";
 import fuck from "./commands/fuck";
@@ -14,16 +15,20 @@ import override from "./commands/override";
 import ping from "./commands/ping";
 import search from "./commands/search";
 import set from "./commands/set";
+import snowflake from "./commands/snowflake";
 import source from "./commands/source";
 import update from "./commands/update";
+import webhooks from "./commands/webhooks";
 
 export {
   _delete as delete,
   _delete as del,
   eval,
   exec,
+  experiments,
   files,
   fix,
+  fix as webpack,
   fuck,
   files as fs,
   help,
@@ -38,6 +43,12 @@ export {
   ping,
   search,
   set,
+  snowflake,
+  snowflake as type,
+  snowflake as typeof,
+  snowflake as instanceof,
   source,
-  update
+  update,
+  webhooks,
+  webhooks as find
 };
