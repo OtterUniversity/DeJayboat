@@ -29,6 +29,7 @@ export default async function ({ message, args, api }: Context) {
       { wait: true }
     );
 
-    await api.deleteWebhookMessage(webhook.id, webhook.token, proxy.id);
+    await api.deleteMessage(proxy.channel_id, proxy.id);
+    await new Promise(res => setTimeout(res, 1000));
   }
 }
