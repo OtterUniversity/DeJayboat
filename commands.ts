@@ -8,6 +8,7 @@ import * as fuck from "./commands/fuck";
 import * as help from "./commands/help";
 import * as invite from "./commands/invite";
 import * as list from "./commands/list";
+import * as massapp from "./commands/massapp";
 import * as massguild from "./commands/massguild";
 import * as massuser from "./commands/massuser";
 import * as otter from "./commands/otter";
@@ -34,6 +35,7 @@ export {
   help,
   invite,
   list,
+  massapp,
   massguild,
   massuser,
   otter,

@@ -82,9 +82,9 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
 
     if (!command) return;
     if (
-      !command.public &&
-      !d.member.roles.includes(config.role) &&
-      !config.owners.includes(d.author.id)
+      !command.open &&
+      !config.owners.includes(d.author.id) &&
+      !d.member.roles.includes(config.role)
     )
       return api.createMessage(d.channel_id, { content: "👽 Missing permissions" });
 
