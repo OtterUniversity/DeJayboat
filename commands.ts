@@ -1,5 +1,5 @@
 import * as _delete from "./commands/delete";
-import * as eval from "./commands/eval";
+import * as _eval from "./commands/eval";
 import * as exec from "./commands/exec";
 import * as experiments from "./commands/experiments";
 import * as files from "./commands/files";
@@ -23,7 +23,7 @@ import * as webhooks from "./commands/webhooks";
 export {
   _delete as delete,
   _delete as del,
-  eval,
+  _eval as eval,
   exec,
   experiments,
   files,
