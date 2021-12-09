@@ -1,9 +1,8 @@
 import { Context, color } from "../util";
 import { execSync } from "child_process";
-import { owners } from "../config";
 
+export const owner = true;
 export default async function ({ message, args, api }: Context) {
-  if (!owners.includes(message.author.id)) return;
   try {
     const res = execSync(args.join(" "), { timeout: 10000 });
     api.createMessage(message.channel_id, {

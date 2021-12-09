@@ -1,24 +1,24 @@
-import _delete from "./commands/delete";
-import eval from "./commands/eval";
-import exec from "./commands/exec";
-import experiments from "./commands/experiments";
-import files from "./commands/files";
-import fix from "./commands/fix";
-import fuck from "./commands/fuck";
-import help from "./commands/help";
-import invite from "./commands/invite";
-import list from "./commands/list";
-import massguild from "./commands/massguild";
-import massuser from "./commands/massuser";
-import otter from "./commands/otter";
-import override from "./commands/override";
-import ping from "./commands/ping";
-import search from "./commands/search";
-import set from "./commands/set";
-import snowflake from "./commands/snowflake";
-import source from "./commands/source";
-import update from "./commands/update";
-import webhooks from "./commands/webhooks";
+import * as _delete from "./commands/delete";
+import * as eval from "./commands/eval";
+import * as exec from "./commands/exec";
+import * as experiments from "./commands/experiments";
+import * as files from "./commands/files";
+import * as fix from "./commands/fix";
+import * as fuck from "./commands/fuck";
+import * as help from "./commands/help";
+import * as invite from "./commands/invite";
+import * as list from "./commands/list";
+import * as massguild from "./commands/massguild";
+import * as massuser from "./commands/massuser";
+import * as otter from "./commands/otter";
+import * as override from "./commands/override";
+import * as ping from "./commands/ping";
+import * as search from "./commands/search";
+import * as set from "./commands/set";
+import * as snowflake from "./commands/snowflake";
+import * as source from "./commands/source";
+import * as update from "./commands/update";
+import * as webhooks from "./commands/webhooks";
 
 export {
   _delete as delete,

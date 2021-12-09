@@ -1,14 +1,17 @@
 import { Context, color } from "../util";
 import { inspect } from "util";
-import { owners } from "../config";
 
 const prefix = "```js\n";
 const suffix = "\n```";
 const slice = "...";
 const max = 4096;
 
-export default async function ({ message, args, api }: Context) {
-  if (!owners.includes(message.author.id)) return;
+function $(path) {
+  return require(path);
+}
+
+export const owner = true;
+export default async function ({ message, args, api, ws }: Context) {
   try {
     let out = eval(args.join(" "));
     if (out instanceof Promise) {

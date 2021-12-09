@@ -1,4 +1,4 @@
-import { Context } from "../util";
+import { color, Context } from "../util";
 
 interface DiscordOverride {
   targetBuildOverride: Record<string, object>;
@@ -56,6 +56,7 @@ export default function ({ message, args, api }: Context) {
       content: "```json\n" + JSON.stringify(data, null, 2) + "```",
       embeds: [
         {
+          color,
           timestamp: new Date(data.expiresAt),
           footer: {
             text: "Expires"
@@ -100,6 +101,7 @@ export default function ({ message, args, api }: Context) {
       content: "```json\n" + JSON.stringify(data, null, 2) + "```",
       embeds: [
         {
+          color,
           fields: [
             {
               name: "ID",

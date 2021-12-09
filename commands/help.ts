@@ -1,15 +1,19 @@
-import { Context } from "../util";
 import * as commands from "../commands";
 
+import { Context } from "../util";
+import { owners } from "../config";
+
 export default async function ({ message, api }: Context) {
-  let unique = new Map();
-  for (const [command, run] of Object.entries(commands)) {
-    const id = run.toString();
-    if (unique.has(id)) unique.set(id, unique.get(id) + ", " + command);
-    else unique.set(id, "`" + command + "`");
+  let content = "👌 You can use:";
+  const unique = new Set();
+  for (const [name, command] of Object.entries(commands)) {
+    // @ts-ignore owner does exist????
+    if (command.owner && !owners.includes(message.author.id)) continue;
+    if (unique.has(command)) continue;
+    unique.add(command);
+
+    content += "`" + name + "`, ";
   }
 
-  api.createMessage(message.channel_id, {
-    content: "👌 You can ||(or can't idk)|| use:\n" + [...unique.values()].join("\n")
-  });
+  api.createMessage(message.channel_id, { content });
 }
