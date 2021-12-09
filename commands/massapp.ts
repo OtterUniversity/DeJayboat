@@ -1,5 +1,5 @@
 import { Context, snowflakeRegex } from "../util";
-import { APIMessage, APIWebhook } from "discord-api-types";
+import { APIMessage, RESTGetAPIChannelWebhooksResult } from "discord-api-types";
 
 export default async function ({ message, args, api }: Context) {
   const input = args.join(" ");
@@ -10,7 +10,11 @@ export default async function ({ message, args, api }: Context) {
       content: "Cannot lookup more than 100 applications"
     });
 
-  let [webhook]: [APIWebhook] = await api.getChannelWebhooks(message.channel_id);
+  const webhooks: RESTGetAPIChannelWebhooksResult = await api.getChannelWebhooks(
+    message.channel_id
+  );
+
+  let webhook = webhooks.find(({ token }) => token);
   webhook ??= await api.createWebhook(message.channel_id, { name: "(real)" });
 
   for await (const id of ids) {
