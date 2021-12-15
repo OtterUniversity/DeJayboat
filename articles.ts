@@ -84,5 +84,5 @@ export default async function (api: Client["api"]) {
   };
 
   callback();
-  setInterval(callback, 900000);
+  setInterval(callback, 1000 * 60);
 }
