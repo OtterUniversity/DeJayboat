@@ -5,6 +5,41 @@ import { get } from "robert";
 import * as fuse from "fuse.js";
 import * as murmurhash from "murmurhash";
 
+async function resolve(id: string, api: Context["api"]): Promise<string> {
+  let ratelimited: string;
+  try {
+    const { name } = await api.getGuildPreview(id);
+    guilds[id] = name;
+    return name + "*";
+  } catch ({ status }) {
+    ratelimited = "🕓 Preview Ratelimited";
+  }
+
+  try {
+    const { name } = await api.getUser(id);
+    guilds[id] = name;
+    return name + "^";
+  } catch ({ status }) {
+    if (status === 404) return "⛔ Invalid Guild";
+    if (status === 403) ratelimited = "🕓 Widget Ratelimited";
+  }
+
+  try {
+    const {
+      guild: { name }
+    } = await get("https://mee6.xyz/api/plugins/levels/leaderboard/" + id)
+      .query("limit", 1)
+      .send("json");
+
+    guilds[id] = name;
+    return name + "%";
+  } catch ({ status }) {
+    if (status === 403) ratelimited = "🕓 MEE6 Ratelimited";
+  }
+
+  return ratelimited ?? "🔒 Private";
+}
+
 export default async function ({ message, args, api }: Context) {
   let treatments: Record<string, number> = {};
   let input = args.join(" ");
@@ -71,25 +106,10 @@ export default async function ({ message, args, api }: Context) {
   });
 
   for await (const [id, status] of ids.entries()) {
-    if (status === "🔍 Loading...")
-      await api
-        .getGuildPreview(id)
-        .then(({ name }) => {
-          guilds[id] = name;
-          return name + "*";
-        })
-        .catch(() =>
-          api
-            .getGuildWidget(id)
-            .then(({ name }) => {
-              guilds[id] = name;
-              return name + "^";
-            })
-            .catch(({ status }) =>
-              status === 403 ? "🔒 Private" : status == 429 ? "🕓 Ratelimited" : "⛔ Invalid Guild"
-            )
-        )
-        .then(value => ids.set(id, value));
+    if (status === "🔍 Loading...") {
+      const value = await resolve(id, api);
+      ids.set(id, value);
+    }
 
     let completed = 0;
     let description = "";
@@ -131,7 +151,7 @@ export default async function ({ message, args, api }: Context) {
                   ? "✅ Looked up **" + ids.size + "** guilds"
                   : "🔍 Looking up **" + ids.size + "** guilds",
               footer: {
-                text: "* = From Preview | ^ = From Widget"
+                text: "* = From Preview | ^ = From Widget | % = From MEE6"
               }
             }
           ]
