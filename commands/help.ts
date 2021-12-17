@@ -1,15 +1,30 @@
-import { Context } from "../util";
 import * as commands from "../commands";
 
+import { owners, role } from "../config";
+import { Context } from "../util";
+
+export const open = true;
 export default async function ({ message, api }: Context) {
-  let unique = new Map();
-  for (const [command, run] of Object.entries(commands)) {
-    const id = run.toString();
-    if (unique.has(id)) unique.set(id, unique.get(id) + ", " + command);
-    else unique.set(id, "`" + command + "`");
+  let content = "👌 You can use: ";
+  const unique = new Set();
+  for (const [name, command] of Object.entries(commands)) {
+    if (
+      // @ts-ignore open exists too
+      !command.open &&
+      !owners.includes(message.author.id) &&
+      !message.member.roles.includes(role)
+    )
+      continue;
+
+    // @ts-ignore owner does exist????
+    if (command.owner && !owners.includes(message.author.id)) continue;
+    if (unique.has(command)) continue;
+    unique.add(command);
+
+    content += "`" + name + "`, ";
   }
 
-  api.createMessage(message.channel_id, {
-    content: "👌 You can ||(or can't idk)|| use:\n" + [...unique.values()].join("\n")
-  });
+  // remove last comma
+  content = content.slice(0, -1);
+  api.createMessage(message.channel_id, { content });
 }

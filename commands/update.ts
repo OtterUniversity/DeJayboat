@@ -1,10 +1,9 @@
 import { execSync as exec } from "child_process";
 import { updateShutdown } from "../store";
 import { Context } from "../util";
-import { owners } from "../config";
 
+export const owner = true;
 export default async function ({ message, api }: Context) {
-  if (!owners.includes(message.author.id)) return;
   const updateMessage = await api.createMessage(message.channel_id, {
     content: "Pulling from GitHub"
   });
