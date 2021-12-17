@@ -14,7 +14,7 @@ export default async function ({ message, args, api }: Context) {
   try {
     meta = lstatSync(path);
   } catch {
-    api.createMessage(message.channel_id, { content: "That path does not exist" });
+    return api.createMessage(message.channel_id, { content: "That path does not exist" });
   }
 
   if (meta.isDirectory()) {

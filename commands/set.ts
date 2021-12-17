@@ -1,6 +1,5 @@
 import { Context, exactSnowflakeRegex } from "../util";
-import { writeFileSync } from "fs";
-import { guilds } from "../store";
+import { guilds, updateGuilds } from "../store";
 
 export default async function ({ message, args, api }: Context) {
   const id = args.shift();
@@ -30,7 +29,7 @@ export default async function ({ message, args, api }: Context) {
 
   guilds[id] = name;
 
-  writeFileSync("guilds.json", JSON.stringify(guilds));
+  updateGuilds();
   api.createMessage(message.channel_id, {
     content: "Set `" + id + "` to **" + name + "**",
     allowedMentions: { parse: [] }
