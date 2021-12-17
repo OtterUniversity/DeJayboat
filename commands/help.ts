@@ -25,6 +25,6 @@ export default async function ({ message, api }: Context) {
   }
 
   // remove last comma
-  content = content.slice(0, -1);
+  content = content.slice(0, -2);
   api.createMessage(message.channel_id, { content });
 }
