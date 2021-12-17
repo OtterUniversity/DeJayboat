@@ -16,11 +16,17 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
   }
 
   try {
-    const { name } = await api.getUser(id);
+    await api.getGuildChannels(id);
+  } catch ({ status }) {
+    if (status === 404) return "⛔ Invalid Guild";
+    if (status === 403) ratelimited = "🕓 Widget Ratelimited";
+  }
+
+  try {
+    const { name } = await api.getGuildWidget(id);
     guilds[id] = name;
     return name + "^";
   } catch ({ status }) {
-    if (status === 404) return "⛔ Invalid Guild";
     if (status === 403) ratelimited = "🕓 Widget Ratelimited";
   }
 
