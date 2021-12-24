@@ -77,10 +77,10 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
     }
 
     if (!d.content.startsWith(config.prefix)) return;
-    const rest = d.content.slice(config.prefix.length).trim();
+    const next = d.content.slice(config.prefix.length).trim();
 
     let command;
-    for (const _command in commands) if (rest.startsWith(_command)) command = _command;
+    for (const { name } of commands) if (next.startsWith(name)) command = name;
 
     if (!command) return;
     if (
@@ -93,7 +93,7 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
     if (command.owner && !config.owners.includes(d.author.id))
       return api.createMessage(d.channel_id, { content: "💀 You don't have access to that" });
 
-    const args = rest.split(/ +/);
+    const args = next.split(/ +/);
     try {
       await command.default({ message: d, args, api, ws });
     } catch (e) {
