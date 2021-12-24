@@ -1,6 +1,8 @@
-import { Context } from "../util";
-import { guilds } from "../store";
+import { Context } from "../../util";
+import { guilds } from "../../store";
 
+export const name = "guilds list";
+export const aliases = ["guilds ls", "guilds export"];
 export default async function ({ message, api }: Context) {
   const text = Object.entries(guilds).map(g => g.join(" "));
   api.createMessage(

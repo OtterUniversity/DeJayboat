@@ -1,6 +1,9 @@
 import { Context } from "../util";
 import { get } from "robert";
 
+export const open = true;
+export const name = "otter";
+export const aliases = ["botter", "oter"];
 export default async function ({ message, args, api }: Context) {
   let amount = 1;
   if (args[0]) {

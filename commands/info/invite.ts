@@ -1,7 +1,9 @@
-import { Context, inviteRegex, color } from "../util";
-import { guilds, updateGuilds } from "../store";
-import { APIInvite } from "discord-api-types";
+import { Context, inviteRegex, color } from "../../util";
+import { guilds, updateGuilds } from "../../store";
+import { APIInvite, GuildVerificationLevel } from "discord-api-types";
 
+export const name = "invite";
+export const aliases = ["inviteinfo", "inv", "ii", "i"];
 export default async function ({ message, args, api }: Context) {
   let url = args.join(" ");
   if (!url) return api.createMessage(message.channel_id, { content: "No invite specified" });
@@ -42,14 +44,13 @@ export default async function ({ message, args, api }: Context) {
           url: `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`
         },
         fields: [
-          { name: "Verification Level", value: guild.verification_level },
+          {
+            name: "ID",
+            value: "`" + guild.id + "`"
+          },
           {
             name: "Channel",
             value: `<#${invite.channel.id}> (\`${invite.channel.id}\`)\n> ${invite.channel.name}`
-          },
-          {
-            name: "Welcome Screen",
-            value: guild.welcome_screen?.description || "No welcome screen"
           },
           {
             name: "Inviter",
@@ -58,12 +59,22 @@ export default async function ({ message, args, api }: Context) {
               : "None"
           },
           {
+            name: "Verification Level",
+            // @ts-ignore shut up typescript
+            value: GuildVerificationLevel[guild.verification_level]
+          },
+          {
             name: "Members",
             value:
-              "Total: " +
+              "Total: `" +
               invite.approximate_member_count +
-              "\nOnline: " +
-              invite.approximate_presence_count
+              "`\nOnline: `" +
+              invite.approximate_presence_count +
+              "`"
+          },
+          {
+            name: "Welcome Screen",
+            value: guild.welcome_screen?.description || "No welcome screen"
           },
           {
             name: "Welcome Channels",

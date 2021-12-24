@@ -1,6 +1,8 @@
-import { Context, exactSnowflakeRegex } from "../util";
-import { guilds, updateGuilds } from "../store";
+import { Context, exactSnowflakeRegex } from "../../util";
+import { guilds, updateGuilds } from "../../store";
 
+export const name = "guilds set";
+export const aliases = ["guilds add"];
 export default async function ({ message, args, api }: Context) {
   const id = args.shift();
   const name = args.join(" ");

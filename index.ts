@@ -1,4 +1,3 @@
-import * as commands from "./commands";
 import * as config from "./config";
 import * as ottercord from "ottercord";
 import * as robert from "robert";
@@ -6,6 +5,8 @@ import * as robert from "robert";
 import { GatewayMessageCreateDispatchData } from "discord-api-types/v9";
 import { shutdown } from "./store.js";
 import { Gateway } from "detritus-client-socket";
+
+import commands from "./commands";
 import articles from "./articles";
 
 const ws = new Gateway.Socket(config.token);
@@ -76,9 +77,10 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
     }
 
     if (!d.content.startsWith(config.prefix)) return;
-    const args = d.content.slice(config.prefix.length).trim().split(/ +/);
-    const name = args.shift();
-    const command = commands[name];
+    const rest = d.content.slice(config.prefix.length).trim();
+
+    let command;
+    for (const _command in commands) if (rest.startsWith(_command)) command = _command;
 
     if (!command) return;
     if (
@@ -91,6 +93,7 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
     if (command.owner && !config.owners.includes(d.author.id))
       return api.createMessage(d.channel_id, { content: "💀 You don't have access to that" });
 
+    const args = rest.split(/ +/);
     try {
       await command.default({ message: d, args, api, ws });
     } catch (e) {

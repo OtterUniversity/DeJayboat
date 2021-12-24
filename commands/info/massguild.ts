@@ -1,10 +1,12 @@
-import { Context, fetchExperiments, snowflakeRegex, color, collectExperiments } from "../util";
-import { guilds } from "../store";
+import { Context, fetchExperiments, snowflakeRegex, color, collectExperiments } from "../../util";
+import { guilds } from "../../store";
 import { get } from "robert";
 
 import * as fuse from "fuse.js";
 import * as murmurhash from "murmurhash";
 
+export const name = "massguild";
+export const aliases = ["guildinfo", "gi"];
 async function resolve(id: string, api: Context["api"]): Promise<string> {
   let ratelimited: string;
   try {

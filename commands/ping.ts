@@ -2,6 +2,8 @@ import { APIMessage } from "discord-api-types";
 import { Context } from "../util";
 import { get } from "robert";
 
+export const open = true;
+export const name = "ping";
 export default async function ({ message, api, ws }: Context) {
   const { id }: APIMessage = await api.createMessage(message.channel_id, {
     content: "Pinging gateway..."

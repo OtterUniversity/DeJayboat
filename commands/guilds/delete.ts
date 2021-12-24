@@ -1,6 +1,8 @@
-import { Context, exactSnowflakeRegex } from "../util";
-import { guilds, updateGuilds } from "../store";
+import { Context, exactSnowflakeRegex } from "../../util";
+import { guilds, updateGuilds } from "../../store";
 
+export const name = "guilds delete";
+export const aliases = ["guilds remove", "guilds del", "guilds rem", "guilds rm"];
 export default async function ({ message, args, api }: Context) {
   const id = args.shift();
   if (!exactSnowflakeRegex.test(id))

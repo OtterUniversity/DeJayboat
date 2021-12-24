@@ -1,7 +1,9 @@
-import { Context, color } from "../util";
-import { guilds } from "../store";
+import { Context, color } from "../../util";
+import { guilds } from "../../store";
 import * as fuse from "fuse.js";
 
+export const name = "guilds search";
+export const aliases = "guilds find";
 export default async function ({ message, args, api }: Context) {
   if (!args.length) api.createMessage(message.channel_id, { content: "No query specified" });
   const query = args.join(" ");

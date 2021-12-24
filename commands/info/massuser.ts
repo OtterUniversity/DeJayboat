@@ -1,6 +1,8 @@
-import { Context, snowflakeRegex, color } from "../util";
+import { Context, snowflakeRegex, color } from "../../util";
 import * as robert from "robert";
 
+export const name = "massuser";
+export const aliases = ["userinfo", "ui"];
 export default async function ({ message, args, api }: Context) {
   let input = args.join(" ");
   let performance = args.includes("-f") || args.includes("--fast");

@@ -1,4 +1,4 @@
-import { color, Context } from "../util";
+import { color, Context } from "../../util";
 
 interface DiscordOverride {
   targetBuildOverride: Record<string, object>;
@@ -16,6 +16,8 @@ interface FireOverride {
   validForUserIds: string[];
 }
 
+export const name = "override";
+export const aliases = ["overrideinfo", "oi"];
 export default function ({ message, args, api }: Context) {
   if (!args.length)
     return api.createMessage(message.channel_id, { content: "Please specify an override URL" });
@@ -28,7 +30,14 @@ export default function ({ message, args, api }: Context) {
   }
 
   const param = url.searchParams.get("s");
-  if (url.host === "discord.com" || url.host === "discordapp.com") {
+  if (
+    url.hostname === "discord.com" ||
+    url.hostname === "discordapp.com" ||
+    url.hostname === "ptb.discord.com" ||
+    url.hostname === "ptb.discordapp.com" ||
+    url.hostname === "canary.discord.com" ||
+    url.hostname === "canary.discordapp.com"
+  ) {
     const [, encoded] = param.split(".");
     if (!encoded) return api.createMessage(message.channel_id, { content: "Invalid Parameter" });
 
@@ -82,7 +91,7 @@ export default function ({ message, args, api }: Context) {
         }
       ]
     });
-  } else if (url.host === "inv.wtf") {
+  } else if (url.hostname === "inv.wtf") {
     let decoded: string;
     try {
       decoded = Buffer.from(param, "base64").toString();

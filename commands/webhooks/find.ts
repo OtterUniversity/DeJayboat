@@ -1,8 +1,10 @@
-import { Context } from "../util";
+import { Context } from "../../util";
 import { get } from "robert";
 
 const regex = /webhooks\/\d{16,22}\/[\w-]{68}/gim;
 
+export const name = "webhooks find";
+export const aliases = ["webhooks search", "webhooks list", "webhooks ls", "webhooks export"];
 export default async function ({ message, api }: Context) {
   const [attachment] = message.attachments;
   if (!attachment) return api.createMessage(message.channel_id, { content: "No attachment found" });

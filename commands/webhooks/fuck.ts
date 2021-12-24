@@ -1,5 +1,14 @@
-import { Context } from "../util";
+import { Context } from "../../util";
 import * as robert from "robert";
+
+export const name = "webhooks fuck";
+export const aliases = [
+  "webhooks delete",
+  "webhooks remove",
+  "webhooks del",
+  "webhooks rem",
+  "webhooks rm"
+];
 
 export default function ({ message, args, api }: Context) {
   const url = args[0];

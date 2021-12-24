@@ -1,6 +1,8 @@
-import { Context, snowflakeRegex } from "../util";
+import { Context, snowflakeRegex } from "../../util";
 import { APIMessage, RESTGetAPIChannelWebhooksResult } from "discord-api-types";
 
+export const name = "massapp";
+export const aliases = ["appinfo", "ai"];
 export default async function ({ message, args, api }: Context) {
   const input = args.join(" ");
   const ids = input.match(snowflakeRegex);

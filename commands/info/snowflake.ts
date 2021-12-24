@@ -1,10 +1,12 @@
-import { Context, exactSnowflakeRegex } from "../util";
+import { Context, exactSnowflakeRegex } from "../../util";
 import { DiscordSnowflake } from "@sapphire/snowflake";
 import { APIMessage } from "discord-api-types";
 import { get } from "robert";
 
 const Snowflake = new DiscordSnowflake();
 
+export const name = "snowflake";
+export const aliases = ["snowflakeinfo", "si"];
 async function resolve(snowflake: string, api: Context["api"]): Promise<string> {
   try {
     const user = await api.getUser(snowflake);

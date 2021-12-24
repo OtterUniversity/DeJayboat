@@ -1,5 +1,6 @@
 import { color, Context, fetchExperiments } from "../util";
 
+export const name = "experiments";
 export default async function ({ message, args, api }: Context) {
   const experiments = await fetchExperiments();
 

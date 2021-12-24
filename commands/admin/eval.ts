@@ -1,4 +1,4 @@
-import { Context, color } from "../util";
+import { Context, color } from "../../util";
 import { inspect } from "util";
 
 const prefix = "```js\n";
@@ -11,6 +11,7 @@ function $(path) {
 }
 
 export const owner = true;
+export const name = "eval";
 export default async function ({ message, args, api, ws }: Context) {
   try {
     let out = eval(args.join(" "));
