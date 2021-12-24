@@ -19,6 +19,7 @@ function walk(dir: string) {
     if (stat.isDirectory()) walk(path);
     else if (file.endsWith(".js")) {
       const command = require(path);
+      console.log(command);
       command.aliases ??= [];
       commands.push(command);
     }

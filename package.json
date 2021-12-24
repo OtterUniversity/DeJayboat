@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc index --target ES2020 --module commonjs --outDir build",
+    "build": "tsc src/**/**/** --target ES2020 --module commonjs --outDir build",
     "start": "npm run build && cd build && node ."
   },
   "keywords": [],
