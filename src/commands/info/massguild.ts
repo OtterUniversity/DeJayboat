@@ -1,6 +1,6 @@
 import { Context, fetchExperiments, snowflakeRegex, color, collectExperiments } from "../../util";
 import { guilds } from "../../store";
-import { get } from "robert";
+import robert from "robert";
 
 import * as fuse from "fuse.js";
 import * as murmurhash from "murmurhash";
@@ -21,7 +21,7 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
     await api.getGuildChannels(id);
   } catch ({ status }) {
     if (status === 404) return "⛔ Invalid Guild";
-    if (status === 403) ratelimited = "🕓 Widget Ratelimited";
+    if (status === 403) ratelimited = "🕓 Channel Ratelimited";
   }
 
   try {
@@ -35,7 +35,8 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
   try {
     const {
       guild: { name }
-    } = await get("https://mee6.xyz/api/plugins/levels/leaderboard/" + id)
+    } = await robert
+      .get("https://mee6.xyz/api/plugins/levels/leaderboard/" + id)
       .query("limit", 1)
       .send("json");
 
@@ -59,7 +60,7 @@ export default async function ({ message, args, api }: Context) {
         content: "No input found"
       });
 
-    input = await get(attachment.url).send("text");
+    input = await robert.get(attachment.url).send("text");
   }
 
   const ids = new Map(

@@ -3,7 +3,7 @@ import { articles as channel } from "./config";
 import { color, Client } from "./util";
 import { load } from "cheerio";
 
-import * as robert from "robert";
+import robert from "robert";
 
 const zendesk = robert
   .client("https://support.discord.com/api/v2/help_center/en-us/articles.json")

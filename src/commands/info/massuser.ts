@@ -1,5 +1,5 @@
 import { Context, snowflakeRegex, color } from "../../util";
-import * as robert from "robert";
+import robert from "robert";
 
 export const name = "massuser";
 export const aliases = ["userinfo", "ui"];

@@ -1,5 +1,5 @@
 import { Context } from "../../util";
-import * as robert from "robert";
+import robert from "robert";
 
 export const name = "webhooks fuck";
 export const aliases = [

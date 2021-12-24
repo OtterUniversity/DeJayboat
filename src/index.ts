@@ -1,6 +1,5 @@
-import * as config from "./config";
 import * as ottercord from "ottercord";
-import * as robert from "robert";
+import * as config from "./config";
 
 import { GatewayMessageCreateDispatchData } from "discord-api-types/v9";
 import { shutdown } from "./store.js";
@@ -8,6 +7,7 @@ import { Gateway } from "detritus-client-socket";
 
 import commands from "./commands";
 import articles from "./articles";
+import robert from "robert";
 
 const ws = new Gateway.Socket(config.token);
 const api = ottercord(config.token);

@@ -1,7 +1,7 @@
 import { lstatSync, readFileSync, readdirSync, writeFileSync } from "fs";
 import { resolve, dirname, basename } from "path";
 import { Context, color } from "../../util";
-import { get } from "robert";
+import robert from "robert";
 
 const base = dirname(dirname(__dirname));
 
@@ -33,7 +33,7 @@ export default async function ({ message, args, api }: Context) {
   } else {
     if (message.attachments.length) {
       const [{ url }] = message.attachments;
-      const file = await get(url).send("buffer");
+      const file = await robert.get(url).send("buffer");
       writeFileSync(path, file);
       api.createMessage(message.channel_id, { content: "✏️ Edited **" + path + "**" });
     } else {

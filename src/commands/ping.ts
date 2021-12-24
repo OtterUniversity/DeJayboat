@@ -1,6 +1,6 @@
 import { APIMessage } from "discord-api-types";
 import { Context } from "../util";
-import { get } from "robert";
+import robert from "robert";
 
 export const open = true;
 export const name = "ping";
@@ -25,7 +25,7 @@ export default async function ({ message, api, ws }: Context) {
   await edit();
 
   const experimentStart = Date.now();
-  await get("https://discord-services.justsomederpyst.repl.co/experiment").send("status");
+  await robert.get("https://discord-services.justsomederpyst.repl.co/experiment").send("status");
   pings.push(["Experiment", Date.now() - experimentStart]);
   edit();
 }
