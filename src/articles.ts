@@ -2,7 +2,6 @@ import { articles as known, updateArticles } from "./store";
 import { articles as channel } from "./config";
 import { color, Client } from "./util";
 import { load } from "cheerio";
-
 import robert from "robert";
 
 const zendesk = robert
