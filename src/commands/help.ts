@@ -1,6 +1,6 @@
 import commands from "../commands";
 
-import { owners, role } from "../../config";
+import { owners, role } from "../config";
 import { Context } from "../util";
 
 export const open = true;
