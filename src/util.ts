@@ -5,8 +5,8 @@ export const color = parseInt("36393f", 16);
 // Thanks Geek :) - https://git.io/Jz9RC
 export const inviteRegex = /discord(?:app)?\.(?:com|gg)\/(?:invite\/)?(?<code>[\w-]{1,25})/;
 
-import * as ottercord from "ottercord";
-import * as murmurhash from "murmurhash";
+import ottercord from "ottercord";
+import murmurhash from "murmurhash";
 
 import { GatewayMessageCreateDispatchData } from "discord-api-types";
 import { Gateway } from "detritus-client-socket";

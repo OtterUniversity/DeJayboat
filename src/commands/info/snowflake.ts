@@ -3,7 +3,7 @@ import { DiscordSnowflake } from "@sapphire/snowflake";
 import { APIMessage } from "discord-api-types";
 import robert from "robert";
 
-const Snowflake = new DiscordSnowflake();
+const Snowflake = DiscordSnowflake;
 
 export const name = "snowflake";
 export const aliases = ["snowflakeinfo", "si"];
@@ -58,8 +58,8 @@ export default async function ({ message, args, api }: Context) {
   const seconds = Math.round(Number(data.timestamp) / 1000);
 
   let content = "❄️ <t:" + seconds + ":F><t:" + seconds + ":R>";
-  content += "\nWorker: " + data.workerID;
-  content += "\nProcess: " + data.processID;
+  content += "\nWorker: " + data.workerId;
+  content += "\nProcess: " + data.processId;
   content += "\nIncrement: " + data.increment;
 
   const msg: APIMessage = await api.createMessage(message.channel_id, { content });

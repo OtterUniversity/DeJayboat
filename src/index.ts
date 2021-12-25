@@ -1,5 +1,5 @@
-import * as ottercord from "ottercord";
-import * as config from "./config";
+import ottercord from "ottercord";
+import * as config from "../config";
 
 import { GatewayMessageCreateDispatchData } from "discord-api-types/v9";
 import { shutdown } from "./store.js";

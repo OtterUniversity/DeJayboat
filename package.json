@@ -4,23 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc src/**/**/** --target ES2020 --module commonjs --outDir build",
-    "start": "npm run build && cd build && node ."
+    "start": "tsc && cd build/src && node ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@sapphire/snowflake": "^2.1.4",
+    "@sapphire/snowflake": "^3.0.0",
     "cheerio": "^1.0.0-rc.10",
-    "detritus-client-socket": "^0.8.2",
-    "discord-api-types": "^0.22.0",
-    "fuse.js": "^6.4.6",
+    "detritus-client-socket": "^0.8.3",
+    "discord-api-types": "^0.26.0",
+    "fuse.js": "^6.5.3",
     "murmurhash": "^2.0.0",
     "ottercord": "^1.0.8",
-    "robert": "^2.0.6"
+    "robert": "^2.6.3"
   },
   "devDependencies": {
-    "@types/node": "^16.11.7"
+    "@types/node": "^17.0.4"
   }
 }
