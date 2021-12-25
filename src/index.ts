@@ -1,12 +1,13 @@
-import ottercord from "ottercord";
 import * as config from "./config";
 
 import { GatewayMessageCreateDispatchData } from "discord-api-types/v9";
-import { shutdown } from "./store.js";
 import { Gateway } from "detritus-client-socket";
+import { shutdown } from "./store.js";
 
-import commands from "./commands";
+import commands, { Command } from "./commands";
 import articles from "./articles";
+
+import ottercord from "ottercord";
 import robert from "robert";
 
 const ws = new Gateway.Socket(config.token);
@@ -79,8 +80,12 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
     if (!d.content.startsWith(config.prefix)) return;
     const next = d.content.slice(config.prefix.length).trim();
 
-    let command;
-    for (const { name } of commands) if (next.startsWith(name)) command = name;
+    let command: Command;
+    for (const _command of commands)
+      if (next.startsWith(_command.name)) {
+        command = _command;
+        break;
+      }
 
     if (!command) return;
     if (
