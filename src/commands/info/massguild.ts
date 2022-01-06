@@ -1,5 +1,5 @@
 import { Context, fetchExperiments, snowflakeRegex, color, collectExperiments } from "../../util";
-import { guilds } from "../../store";
+import { guilds, updateGuilds } from "../../store";
 import robert from "robert";
 
 import * as fuse from "fuse.js";
@@ -21,7 +21,7 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
     await api.getGuildChannels(id);
   } catch ({ status }) {
     if (status === 404) return "⛔ Invalid Guild";
-    if (status === 403) ratelimited = "🕓 Channel Ratelimited";
+    if (status === 429) ratelimited = "🕓 Channel Ratelimited";
   }
 
   try {
@@ -29,7 +29,7 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
     guilds[id] = name;
     return name + "^";
   } catch ({ status }) {
-    if (status === 403) ratelimited = "🕓 Widget Ratelimited";
+    if (status === 429) ratelimited = "🕓 Widget Ratelimited";
   }
 
   try {
@@ -43,7 +43,7 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
     guilds[id] = name;
     return name + "%";
   } catch ({ status }) {
-    if (status === 403) ratelimited = "🕓 MEE6 Ratelimited";
+    if (status === 429) ratelimited = "🕓 MEE6 Ratelimited";
   }
 
   return ratelimited ?? "🔒 Private";
@@ -171,4 +171,6 @@ export default async function ({ message, args, api }: Context) {
       if (completed === ids.size) break;
     }
   }
+
+  updateGuilds();
 }

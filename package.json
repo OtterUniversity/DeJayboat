@@ -2,7 +2,7 @@
   "name": "dejayboat",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "build/index.js",
   "scripts": {
     "build": "tsc",
     "start": "npm run build && cd build && node ."
