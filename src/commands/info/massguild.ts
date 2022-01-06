@@ -14,7 +14,7 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
     guilds[id] = name;
     return name + "*";
   } catch ({ status }) {
-    ratelimited = "🕓 Preview Ratelimited";
+    if (status === 429) ratelimited = "🕓 Preview Ratelimited";
   }
 
   try {
