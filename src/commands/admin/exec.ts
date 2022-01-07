@@ -10,7 +10,7 @@ export default async function ({ message, args, api }: Context) {
       embeds: [
         {
           color,
-          description: "```js\n" + res.toString().slice(0, 4000) + "```"
+          description: "```ansi\n" + res.toString().slice(0, 4000) + "```"
         }
       ]
     });
