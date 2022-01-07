@@ -1,6 +1,6 @@
 import { Context, color } from "../../util";
 import { guilds } from "../../store";
-import * as fuse from "fuse.js";
+import fuse from "fuse.js";
 
 export const name = "guilds search";
 export const aliases = "guilds find";

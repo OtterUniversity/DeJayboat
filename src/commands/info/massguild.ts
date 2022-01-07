@@ -2,8 +2,8 @@ import { Context, fetchExperiments, snowflakeRegex, color, collectExperiments } 
 import { guilds, updateGuilds } from "../../store";
 import robert from "robert";
 
-import * as fuse from "fuse.js";
-import * as murmurhash from "murmurhash";
+import fuse from "fuse.js";
+import murmurhash from "murmurhash";
 
 export const name = "massguild";
 export const aliases = ["guildinfo", "gi"];
