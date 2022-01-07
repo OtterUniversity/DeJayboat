@@ -1,6 +1,8 @@
 import { Context, inviteRegex, color } from "../../util";
 import { guilds, updateGuilds } from "../../store";
-import { APIInvite, GuildVerificationLevel } from "discord-api-types";
+import { APIInvite } from "discord-api-types";
+
+const VerificationLevels = ["None", "Low", "Medium", "High", "Very High"];
 
 export const name = "invite";
 export const aliases = ["inviteinfo", "inv", "ii", "i"];
@@ -60,8 +62,7 @@ export default async function ({ message, args, api }: Context) {
           },
           {
             name: "Verification Level",
-            // @ts-ignore shut up typescript
-            value: GuildVerificationLevel[guild.verification_level]
+            value: VerificationLevels[guild.verification_level]
           },
           {
             name: "Members",
