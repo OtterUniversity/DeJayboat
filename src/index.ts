@@ -1,6 +1,11 @@
 import * as config from "./config";
 
-import { GatewayMessageCreateDispatchData } from "discord-api-types/v9";
+import {
+  UserFlags,
+  GatewayDispatchEvents,
+  GatewayMessageCreateDispatchData,
+  GatewayGuildMemberAddDispatchData
+} from "discord-api-types/v9";
 import { Gateway } from "detritus-client-socket";
 import { shutdown } from "./store.js";
 
@@ -18,10 +23,11 @@ ws.on("ready", () => {
     api.editMessage(shutdown.channel, shutdown.message, { content: "🟢 Online" });
 });
 
-ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchData }) => {
-  if (t === "MESSAGE_CREATE" && d.guild_id) {
-    if (d.channel_id === config.datamining) {
-      const [embed] = d.embeds;
+ws.on("packet", async ({ t, d }: { t: string; d }) => {
+  if (t === GatewayDispatchEvents.MessageCreate && d.guild_id) {
+    const message: GatewayMessageCreateDispatchData = d;
+    if (message.channel_id === config.datamining) {
+      const [embed] = message.embeds;
       const images = embed?.description?.match(/https?:\/\/\S+\.(png|jpg|jpeg|webp)\b/g);
       if (images) {
         const files = [];
@@ -45,11 +51,11 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
               .catch(() => {});
         }
 
-        if (files.length) api.createMessage(d.channel_id, {}, files);
+        if (files.length) api.createMessage(message.channel_id, {}, files);
       }
     }
 
-    const svgs = d.content.match(/https?:\/\/\S+\.svg\b/g);
+    const svgs = message.content.match(/https?:\/\/\S+\.svg\b/g);
     if (svgs) {
       const files = [];
       for await (const svg of svgs.slice(0, 10)) {
@@ -74,12 +80,12 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
             .catch(() => {});
       }
 
-      if (files.length) api.createMessage(d.channel_id, {}, files);
+      if (files.length) api.createMessage(message.channel_id, {}, files);
     }
 
-    if (!d.content.startsWith(config.prefix)) return;
+    if (!message.content.startsWith(config.prefix)) return;
 
-    let next = d.content.slice(config.prefix.length).trim();
+    let next = message.content.slice(config.prefix.length).trim();
     let command: Command;
     for (const _command of commands)
       if (next.startsWith(_command.name)) {
@@ -91,22 +97,30 @@ ws.on("packet", async ({ t, d }: { t: string; d: GatewayMessageCreateDispatchDat
     if (!command) return;
     if (
       !command.open &&
-      !config.owners.includes(d.author.id) &&
-      !d.member.roles.includes(config.role)
+      !config.owners.includes(message.author.id) &&
+      !message.member.roles.includes(config.role)
     )
-      return api.createMessage(d.channel_id, { content: "👽 Missing permissions" });
+      return api.createMessage(message.channel_id, { content: "👽 Missing permissions" });
 
-    if (command.owner && !config.owners.includes(d.author.id))
-      return api.createMessage(d.channel_id, { content: "💀 You don't have access to that" });
+    if (command.owner && !config.owners.includes(message.author.id))
+      return api.createMessage(message.channel_id, { content: "💀 You don't have access to that" });
 
     const args = next.split(/ +/);
     try {
-      await command.default({ message: d, args, api, ws });
+      await command.default({ message, args, api, ws });
     } catch (e) {
-      api.createMessage(d.channel_id, {
+      api.createMessage(message.channel_id, {
         content: "<@296776625432035328> it broke\n```js\n" + e.message + "\n" + e.stack + "```"
       });
     }
+  }
+
+  if (t === GatewayDispatchEvents.GuildMemberAdd) {
+    const member: GatewayGuildMemberAddDispatchData = d;
+    if (member.user.bot) return;
+
+    if ((member.user.flags & UserFlags.Staff) === UserFlags.Staff)
+      api.addGuildMemberRole(member.guild_id, member.user.id, "919850136643969054");
   }
 });
 
