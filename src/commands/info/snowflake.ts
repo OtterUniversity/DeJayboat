@@ -6,7 +6,7 @@ import robert from "robert";
 const Snowflake = DiscordSnowflake;
 
 export const name = "snowflake";
-export const aliases = ["snowflakeinfo", "si"];
+export const aliases = ["snowflakeinfo", "si", "typeof", "instanceof"];
 async function resolve(snowflake: string, api: Context["api"]): Promise<string> {
   try {
     const user = await api.getUser(snowflake);
