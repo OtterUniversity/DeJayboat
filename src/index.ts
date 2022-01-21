@@ -88,7 +88,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     let next = message.content.slice(config.prefix.length).trim();
     let command: Command;
     for (const _command of commands)
-      if (next.startsWith(_command.name)) {
+      if (next.startsWith(_command.name) || _command.aliases?.find(alias => next.startsWith(alias))) {
         next = next.slice(_command.name.length).trim();
         command = _command;
         break;
