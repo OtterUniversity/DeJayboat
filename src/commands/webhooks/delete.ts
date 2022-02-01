@@ -11,13 +11,16 @@ export const aliases = [
 ];
 
 export default function ({ message, args, api }: Context) {
-  const url = args[0];
+  let url: URL;
 
   try {
-    new URL(url);
+    new URL(args.join("/"), "https://discord.com/api/v9/webhooks");
   } catch {
     return api.createMessage(message.channel_id, { content: "Invalid URL" });
   }
+
+  if (url.origin !== "https://discord.com")
+    return api.createMessage(message.channel_id, { content: "Invalid URL" });
 
   robert
     .get(url)

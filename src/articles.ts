@@ -28,6 +28,7 @@ export default async function (api: Client["api"]) {
     if (after.length) {
       known.push(...after.map(({ id }) => id));
       updateArticles();
+
       const data = {
         content: after.map(a => a.html_url).join("\n"),
         embeds: after.map(a => {

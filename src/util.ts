@@ -5,13 +5,15 @@ export const color = parseInt("36393f", 16);
 // Thanks Geek :) - https://git.io/Jz9RC
 export const inviteRegex = /discord(?:app)?\.(?:com|gg)\/(?:invite\/)?(?<code>[\w-]{1,25})/;
 
-import ottercord from "ottercord";
 import murmurhash from "murmurhash";
+import ottercord from "ottercord";
 
 import { GatewayMessageCreateDispatchData } from "discord-api-types";
 import { Gateway } from "detritus-client-socket";
-import { guilds } from "./store";
+import { exec as _exec, ExecOptions } from "child_process";
 import robert from "robert";
+
+import { guilds } from "./store";
 
 export interface Client {
   api?: ReturnType<typeof ottercord>;
@@ -21,6 +23,15 @@ export interface Client {
 export interface Context extends Client {
   message?: GatewayMessageCreateDispatchData;
   args?: string[];
+}
+
+export function exec(command: string, options: ExecOptions = {}) {
+  return new Promise((resolve, reject) => {
+    _exec(command, options, (error, stdout, stderr) => {
+      if (error) return reject(error);
+      resolve(stdout || stderr);
+    });
+  });
 }
 
 export function fetchExperiments(): Promise<Record<string, any>> {

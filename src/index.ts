@@ -55,7 +55,12 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       }
     }
 
-    const svgs = message.content.match(/https?:\/\/\S+\.svg\b/g);
+    const svgs = message.content.match(/https?:\/\/\S+\.svg\b/g) ?? [];
+    if (message.attachments.length) {
+      const attachments = message.attachments.map(({ url }) => url);
+      svgs.push(...attachments);
+    }
+
     if (svgs) {
       const files = [];
       for await (const svg of svgs.slice(0, 10)) {
@@ -93,14 +98,14 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
         command = _command;
         break;
       }
-      
+
       for (const alias of _command.aliases)
         if (next === alias || next.startsWith(alias + " ")) {
           next = next.slice(alias.length).trim();
           command = _command;
           break;
         }
-      
+
       if (command) break;
     }
 
@@ -119,6 +124,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     try {
       await command.default({ message, args, api, ws });
     } catch (e) {
+      console.log(e);
       api.createMessage(message.channel_id, {
         content: "<@296776625432035328> it broke\n```js\n" + e.message + "\n" + e.stack + "```"
       });
