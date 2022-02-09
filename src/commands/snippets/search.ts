@@ -30,7 +30,7 @@ export default async function ({ message, args, api }: Context) {
           title: item.title,
           author: { name: item.author },
           description: item.description,
-          fields: [
+          fields: results.length && [
             {
               name: "Other results",
               value: results
