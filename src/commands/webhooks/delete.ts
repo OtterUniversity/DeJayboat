@@ -19,7 +19,14 @@ export default function ({ message, args, api }: Context) {
     return api.createMessage(message.channel_id, { content: "Invalid URL" });
   }
 
-  if (url.origin !== "https://discord.com")
+  if (
+    url.hostname !== "discord.com" &&
+    url.hostname !== "discordapp.com" &&
+    url.hostname !== "ptb.discord.com" &&
+    url.hostname !== "ptb.discordapp.com" &&
+    url.hostname !== "canary.discord.com" &&
+    url.hostname !== "canary.discordapp.com"
+  )
     return api.createMessage(message.channel_id, { content: "Invalid URL" });
 
   robert
