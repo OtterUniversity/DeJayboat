@@ -6,7 +6,8 @@
     "outDir": "build",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "lib": ["ES2021.String"]
   },
   "include": ["src/**/*.ts", "config.ts"]
 }
