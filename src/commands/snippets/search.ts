@@ -22,13 +22,26 @@ export default async function ({ message, args, api }: Context) {
     return api.createMessage(message.channel_id, { content: "No results found" });
 
   const { item } = results.shift();
-  await api.createMessage(message.channel_id, {
-    embeds: [
-      {
-        title: item.title,
-        author: { name: item.author },
-        description: item.description + "\n\n```js\n" + item.code + "```"
-      }
-    ]
-  });
+  await api.createMessage(
+    message.channel_id,
+    {
+      embeds: [
+        {
+          title: item.title,
+          author: { name: item.author },
+          description: item.description,
+          fields: [
+            {
+              name: "Other results",
+              value: results
+                .slice(0, 10)
+                .map(({ item }) => `\`${item.title}\``)
+                .join("\n")
+            }
+          ]
+        }
+      ]
+    },
+    { name: item.title + ".js", value: item.code }
+  );
 }
