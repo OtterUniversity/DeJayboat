@@ -33,7 +33,7 @@ export default async function ({ message, args, api }: Context) {
     if (member) {
       avatar = member.avatar
         ? `https://cdn.discordapp.com/guilds/${message.guild_id}/users/${member.user.id}/avatars/${
-            member.user
+            member.avatar
           }.${member.avatar.startsWith("a_") ? "gif" : "png"}`
         : member.user.avatar
         ? `https://cdn.discordapp.com/avatars/${member.user.id}/${member.user.avatar}.${
