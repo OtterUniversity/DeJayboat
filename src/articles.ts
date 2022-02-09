@@ -5,37 +5,54 @@ import { load } from "cheerio";
 import robert from "robert";
 
 const zendesk = robert
-  .client("https://support.discord.com/api/v2/help_center/en-us/articles.json")
-  .query("sort_by", "created_at")
-  .query("sort_order", "desc")
-  .query("per_page", 99)
+  .client("https://support.discord.com/api/v2/help_center/en-us")
   .format("json");
 
 export default async function (api: Client["api"]) {
-  const categories = await robert
-    .get("https://support.discord.com/api/v2/help_center/en-us/categories.json")
-    .send("json")
+  const categories = await zendesk
+    .get("/categories.json")
+    .send()
     .then(res => Object.fromEntries(res.categories.map(c => [c.id, c])));
 
-  const sections = await robert
-    .get("https://support.discord.com/api/v2/help_center/en-us/sections.json")
-    .send("json")
+  const sections = await zendesk
+    .get("/sections.json")
+    .send()
     .then(res => Object.fromEntries(res.sections.map(s => [s.id, s])));
 
-  const callback = async () => {
-    const { articles } = await zendesk.get().send();
+  if (!known.length) {
+    console.log("Setting up articles...");
+    const { articles } = await zendesk
+      .get("/articles.json")
+      .query("sort_by", "created_at")
+      .query("sort_order", "desc")
+      .query("per_page", 99)
+      .send();
+
+    known.push(...articles.map(({ id }) => id));
+    updateArticles();
+  }
+
+  setInterval(async () => {
+    console.log("Fetching articles");
+    const { articles } = await zendesk
+      .get("/articles.json")
+      .query("sort_by", "created_at")
+      .query("sort_order", "desc")
+      .query("per_page", 99)
+      .send();
+
     const after = articles.filter(({ id }) => !known.includes(id));
     if (after.length) {
       known.push(...after.map(({ id }) => id));
       updateArticles();
 
       const data = {
-        content: after.map(a => a.html_url).join("\n"),
-        embeds: after.map(a => {
-          const section = sections[a.section_id] ?? "Unknown";
+        content: after.map(article => article.html_url).join("\n"),
+        embeds: after.map(article => {
+          const section = sections[article.section_id] ?? "Unknown";
           const category = categories[section.category_id] ?? "Unknown";
 
-          const html = load(a.body);
+          const html = load(article.body);
           const image = html("img")[0]?.attribs.src;
           const description =
             html
@@ -44,7 +61,7 @@ export default async function (api: Client["api"]) {
               .trim()
               .slice(0, 200) + "...";
 
-          const tags = a.label_names
+          const tags = article.label_names
             .map(tag =>
               tag
                 .split(/[^\w]/gim)
@@ -56,9 +73,9 @@ export default async function (api: Client["api"]) {
           return {
             color,
             description,
-            title: a.title,
-            url: a.html_url,
-            timestamp: a.created_at,
+            title: article.title,
+            url: article.html_url,
+            timestamp: article.created_at,
             image: { url: image },
             footer: {
               text: tags
@@ -81,8 +98,5 @@ export default async function (api: Client["api"]) {
 
       api.createMessage(channel, data);
     }
-  };
-
-  callback();
-  setInterval(callback, 1000 * 60);
+  }, 1000 * 60);
 }

@@ -134,7 +134,6 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
   if (t === GatewayDispatchEvents.GuildMemberAdd) {
     const member: GatewayGuildMemberAddDispatchData = d;
     if (member.user.bot) return;
-
     if ((member.user.flags & UserFlags.Staff) === UserFlags.Staff)
       api.addGuildMemberRole(member.guild_id, member.user.id, "919850136643969054");
   }

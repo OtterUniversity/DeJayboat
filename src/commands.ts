@@ -26,4 +26,6 @@ function walk(dir: string) {
 }
 
 walk(resolve(__dirname, "commands"));
+console.log("Loaded " + commands.length + " commands");
+
 export default commands;
