@@ -14,12 +14,12 @@ export default function ({ message, args, api }: Context) {
   let url: URL;
 
   try {
-    new URL(args.join("/"), "https://discord.com/api/v9/webhooks");
+    url = new URL(args.join("/"), "https://discord.com/api/v9/webhooks");
   } catch {
     return api.createMessage(message.channel_id, { content: "Invalid URL" });
   }
 
-  if (!url || url.origin !== "https://discord.com")
+  if (url.origin !== "https://discord.com")
     return api.createMessage(message.channel_id, { content: "Invalid URL" });
 
   robert
