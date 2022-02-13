@@ -115,10 +115,10 @@ export default async function ({ message, args, api }: Context) {
   });
 
   for await (const [id, status] of ids.entries()) {
-    if (status === "🔍 Loading...") {
-      const value = await resolve(id, api);
-      ids.set(id, value);
-    }
+    if (status !== "🔍 Loading...") continue;
+
+    const value = await resolve(id, api);
+    ids.set(id, value);
 
     let completed = 0;
     let description = "";
