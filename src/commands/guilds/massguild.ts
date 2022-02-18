@@ -123,8 +123,8 @@ export default async function ({ message, args, api }: Context) {
 
   function render() {
     let completed = 0;
-
     let body = "";
+
     for (const [id, value] of ids.entries()) {
       body += "`" + id + "` " + (value ?? "🔍 Loading...");
       const treatment = treatments[id];
@@ -158,73 +158,50 @@ export default async function ({ message, args, api }: Context) {
 
     if (fast) continue;
 
-    let file;
-    if (description.length > 4000) {
-      if (completed === ids.size)
-        file = { name: "guilds.txt", value: description };
-      description = description.slice(0, 4000);
-    }
+    const { body, progress } = render();
+    if (body.length > 4000) body = body.slice(0, 4000);
 
-    await api.editMessage(
-      pending.channel_id,
-      pending.id,
-      {
-        content:
-          "(`" +
-          completed +
-          "/" +
-          ids.size +
-          "`) [" +
-          "⬜".repeat(percent) +
-          "🔳".repeat(10 - percent) +
-          "] ",
-        embeds: [
-          {
-            color,
-            description,
-            title: "🔍 Looking up **" + ids.size + "** guilds",
-            footer: {
-              text: "* = From Preview | ^ = From Widget | % = From MEE6",
-            },
+    await api.editMessage(pending.channel_id, pending.id, {
+      content: progress,
+      embeds: [
+        {
+          color,
+          description: body,
+          title: "🔍 Looking up **" + ids.size + "** guilds",
+          footer: {
+            text: "* = From Preview | ^ = From Widget | % = From MEE6",
           },
-        ],
-      },
-      file
-    );
-  }
-}
-
-updateGuilds();
-
-let file;
-if (description.length > 4000) {
-  file = { name: "guilds.txt", value: description };
-  description = description.slice(0, 4000);
-}
-
-await api.editMessage(
-  pending.channel_id,
-  pending.id,
-  {
-    content:
-      "(`" +
-      completed +
-      "/" +
-      ids.size +
-      "`) [" +
-      "⬜".repeat(percent) +
-      "🔳".repeat(10 - percent) +
-      "] ",
-    embeds: [
-      {
-        color,
-        description,
-        title: "✅ Looked up **" + ids.size + "** guilds",
-        footer: {
-          text: "* = From Preview | ^ = From Widget | % = From MEE6",
         },
-      },
-    ],
-  },
-  file
-);
+      ],
+    });
+  }
+
+  updateGuilds();
+
+  const { body, progress } = render();
+
+  let file;
+  if (body.length > 4000) {
+    file = { name: "guilds.txt", value: body };
+    body = body.slice(0, 4000);
+  }
+
+  await api.editMessage(
+    pending.channel_id,
+    pending.id,
+    {
+      content: progress,
+      embeds: [
+        {
+          color,
+          description: body,
+          title: "✅ Looked up **" + ids.size + "** guilds",
+          footer: {
+            text: "* = From Preview | ^ = From Widget | % = From MEE6",
+          },
+        },
+      ],
+    },
+    file
+  );
+}
