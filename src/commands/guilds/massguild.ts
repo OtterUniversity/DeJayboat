@@ -127,6 +127,7 @@ export default async function ({ message, args, api }: Context) {
     let body = "";
 
     for (const [id, value] of ids.entries()) {
+      if (value) completed++
       body += "`" + id + "` " + (value ?? "🔍 Loading...");
       const treatment = treatments[id];
       if (treatment) body += " (" + treatment + ")";
