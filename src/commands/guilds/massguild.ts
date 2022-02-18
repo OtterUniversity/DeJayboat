@@ -1,4 +1,10 @@
-import { Context, fetchExperiments, snowflakeRegex, color, collectExperiments } from "../../util";
+import {
+  Context,
+  fetchExperiments,
+  snowflakeRegex,
+  color,
+  collectExperiments,
+} from "../../util";
 import { guilds, updateGuilds } from "../../store";
 import robert from "robert";
 
@@ -34,7 +40,7 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
 
   try {
     const {
-      guild: { name }
+      guild: { name },
     } = await robert
       .get("https://mee6.xyz/api/plugins/levels/leaderboard/" + id)
       .query("limit", 1)
@@ -52,19 +58,19 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
 export default async function ({ message, args, api }: Context) {
   let treatments: Record<string, number> = {};
   let input = args.join(" ");
-  let performance = args.includes("-f") || args.includes("--fast");
+  let fast = args.includes("-f") || args.includes("--fast");
   if (!input) {
     const [attachment] = message.attachments;
     if (!attachment?.content_type.endsWith("charset=utf-8"))
       return api.createMessage(message.channel_id, {
-        content: "No input found"
+        content: "No input found",
       });
 
     input = await robert.get(attachment.url).send("text");
   }
 
-  const ids = new Map(
-    input.match(snowflakeRegex)?.map(key => [key, guilds[key] ?? "🔍 Loading..."])
+  const ids = new Map<string, null | string>(
+    input.match(snowflakeRegex)?.map((key) => [key, null])
   );
 
   if (!ids.size) {
@@ -76,101 +82,149 @@ export default async function ({ message, args, api }: Context) {
     if (!experiment) {
       // @ts-ignore again i dont want to enable esmoduleinterp
       const engine = new fuse(Object.values(experiments), {
-        keys: ["metadata.title"]
+        keys: ["metadata.title"],
       });
 
       const search = engine.search(args.join(" "));
       if (!search.length)
         return api.createMessage(message.channel_id, {
-          content: "No experiment matched that query"
+          content: "No experiment matched that query",
         });
 
       experiment = search[0].item;
     }
 
     await api.createMessage(message.channel_id, {
-      content: "Getting guilds in experiment **" + experiment.metadata.title + "**"
+      content:
+        "Getting guilds in experiment **" + experiment.metadata.title + "**",
     });
 
     const experimentGuilds = await collectExperiments(experiment, {
       message,
       args,
-      api
+      api,
     });
 
     if (!experimentGuilds.ids.length)
       return api.createMessage(message.channel_id, { content: "No IDs found" });
 
-    experimentGuilds.ids.forEach(id => ids.set(id, guilds[id] ?? "🔍 Loading..."));
+    experimentGuilds.ids.forEach((id) => ids.set(id, null));
     treatments = experimentGuilds.treatments;
   }
 
-  if ([...ids.values()].filter(value => value === "🔍 Loading...").length > 1000)
+  if (ids.size > 1000)
     return api.createMessage(message.channel_id, {
-      content: "Cannot lookup more than 1000 guilds"
+      content: "Cannot lookup more than 1000 guilds",
     });
 
   const pending = await api.createMessage(message.channel_id, {
-    content: "🔍 Loading..."
+    content: "🔍 Loading...",
   });
 
-  for await (const [id, status] of ids.entries()) {
-    if (status !== "🔍 Loading...") continue;
+  function render() {
+    let completed = 0;
+
+    let body = "";
+    for (const [id, value] of ids.entries()) {
+      body += "`" + id + "` " + (value ?? "🔍 Loading...");
+      const treatment = treatments[id];
+      if (treatment) body += " (" + treatment + ")";
+      body += "\n";
+    }
+
+    const percent = Math.round((completed / ids.size) * 10);
+    const progress =
+      "(`" +
+      completed +
+      "/" +
+      ids.size +
+      "`) [" +
+      "⬜".repeat(percent) +
+      "🔳".repeat(10 - percent) +
+      "] ";
+
+    return { completed, body, percent, progress };
+  }
+
+  for (const [id] of ids.entries()) {
+    if (guilds[id]) {
+      const value = guilds[id];
+      ids.set(id, value);
+      continue;
+    }
 
     const value = await resolve(id, api);
     ids.set(id, value);
 
-    let completed = 0;
-    let description = "";
-    ids.forEach((value, key) => {
-      if (value !== "🔍 Loading...") completed++;
-      description += "`" + key + "` " + value;
-      const treatment = treatments[key];
-      if (treatment) description += " (" + treatment + ")";
-      description += "\n";
-    });
+    if (fast) continue;
 
-    const percent = Math.round((completed / ids.size) * 10);
-    if (!performance || completed === ids.size) {
-      let file;
-      if (description.length > 4000) {
-        if (completed === ids.size) file = { name: "guilds.txt", value: description };
-        description = description.slice(0, 4000);
-      }
-
-      await api.editMessage(
-        pending.channel_id,
-        pending.id,
-        {
-          content:
-            "(`" +
-            completed +
-            "/" +
-            ids.size +
-            "`) [" +
-            "⬜".repeat(percent) +
-            "🔳".repeat(10 - percent) +
-            "] ",
-          embeds: [
-            {
-              color,
-              description,
-              title:
-                completed === ids.size
-                  ? "✅ Looked up **" + ids.size + "** guilds"
-                  : "🔍 Looking up **" + ids.size + "** guilds",
-              footer: {
-                text: "* = From Preview | ^ = From Widget | % = From MEE6"
-              }
-            }
-          ]
-        },
-        file
-      );
-
-      if (completed === ids.size) break;
+    let file;
+    if (description.length > 4000) {
+      if (completed === ids.size)
+        file = { name: "guilds.txt", value: description };
+      description = description.slice(0, 4000);
     }
-  }
 
-  updateGuilds();
+    await api.editMessage(
+      pending.channel_id,
+      pending.id,
+      {
+        content:
+          "(`" +
+          completed +
+          "/" +
+          ids.size +
+          "`) [" +
+          "⬜".repeat(percent) +
+          "🔳".repeat(10 - percent) +
+          "] ",
+        embeds: [
+          {
+            color,
+            description,
+            title: "🔍 Looking up **" + ids.size + "** guilds",
+            footer: {
+              text: "* = From Preview | ^ = From Widget | % = From MEE6",
+            },
+          },
+        ],
+      },
+      file
+    );
+  }
 }
+
+updateGuilds();
+
+let file;
+if (description.length > 4000) {
+  file = { name: "guilds.txt", value: description };
+  description = description.slice(0, 4000);
+}
+
+await api.editMessage(
+  pending.channel_id,
+  pending.id,
+  {
+    content:
+      "(`" +
+      completed +
+      "/" +
+      ids.size +
+      "`) [" +
+      "⬜".repeat(percent) +
+      "🔳".repeat(10 - percent) +
+      "] ",
+    embeds: [
+      {
+        color,
+        description,
+        title: "✅ Looked up **" + ids.size + "** guilds",
+        footer: {
+          text: "* = From Preview | ^ = From Widget | % = From MEE6",
+        },
+      },
+    ],
+  },
+  file
+);
