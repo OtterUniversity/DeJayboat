@@ -13,6 +13,7 @@ import murmurhash from "murmurhash";
 
 export const name = "massguild";
 export const aliases = ["guildinfo", "gi"];
+
 async function resolve(id: string, api: Context["api"]): Promise<string> {
   let ratelimited: string;
   try {
@@ -158,7 +159,7 @@ export default async function ({ message, args, api }: Context) {
 
     if (fast) continue;
 
-    const { body, progress } = render();
+    let { body, progress } = render();
     if (body.length > 4000) body = body.slice(0, 4000);
 
     await api.editMessage(pending.channel_id, pending.id, {
@@ -178,7 +179,7 @@ export default async function ({ message, args, api }: Context) {
 
   updateGuilds();
 
-  const { body, progress } = render();
+  let { body, progress } = render();
 
   let file;
   if (body.length > 4000) {
