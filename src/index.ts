@@ -116,10 +116,6 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       !message.member.roles.includes(config.role)
     )
       return api.createMessage(message.channel_id, { content: "👽 Missing permissions" });
-
-    if (command.owner && !config.owners.includes(message.author.id))
-      return api.createMessage(message.channel_id, { content: "💀 You don't have access to that" });
-
     const args = next.split(/ +/);
     try {
       await command.default({ message, args, api, ws });
