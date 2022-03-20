@@ -1,6 +1,6 @@
 bot for dejays place
 
-![dejays place lol](https://inv.wtf/widget/dejay)
+[![dejays place lol](https://inv.wtf/widget/dejay)](https://inv.wtf/dejay)
 
 selfhosting is not reccomended but heres the basics
 
