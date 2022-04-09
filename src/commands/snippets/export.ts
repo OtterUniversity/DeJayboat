@@ -1,15 +1,18 @@
-import { BASE_DIR } from "../../../snippets/util";
 import { createReadStream } from "fs";
-import { Context, exec } from "../../util";
 import { resolve } from "path";
+
+import { BASE_DIR } from "../../../snippets/util";
+import { Context, exec } from "../../util";
 
 export const name = "snippets export";
 export const aliases = ["snippets code", "snippets build"];
 
 export default async function ({ message, api }: Context) {
-  await exec("git pull", { cwd: BASE_DIR });
+  await exec(["git", "pull"], { cwd: BASE_DIR });
 
-  const snippets = createReadStream(resolve(BASE_DIR, "build", "output", "snippets.js"));
+  const snippets = createReadStream(
+    resolve(BASE_DIR, "build", "output", "snippets.js")
+  );
   const { id, attachments } = await api.createMessage(
     message.channel_id,
     {},
@@ -17,6 +20,7 @@ export default async function ({ message, api }: Context) {
   );
   const [{ url }] = attachments;
   api.editMessage(message.channel_id, id, {
-    content: "```js\neval(await (await fetch(" + JSON.stringify(url) + ")).text())```"
+    content:
+      "```js\neval(await (await fetch(" + JSON.stringify(url) + ")).text())```"
   });
 }

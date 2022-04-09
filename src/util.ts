@@ -3,14 +3,15 @@ export const snowflakeRegex = /\b\d{17,19}\b/g;
 export const color = parseInt("36393f", 16);
 
 // Thanks Geek :) - https://git.io/Jz9RC
-export const inviteRegex = /discord(?:app)?\.(?:com|gg)\/(?:invite\/)?(?<code>[\w-]{1,25})/;
+export const inviteRegex =
+  /discord(?:app)?\.(?:com|gg)\/(?:invite\/)?(?<code>[\w-]{1,25})/;
 
 import murmurhash from "murmurhash";
 import ottercord from "ottercord";
 
 import { GatewayMessageCreateDispatchData } from "discord-api-types";
+import { SpawnOptionsWithoutStdio, spawn } from "child_process";
 import { Gateway } from "detritus-client-socket";
-import { exec as _exec, ExecOptions } from "child_process";
 import robert from "robert";
 
 import { guilds } from "./store";
@@ -25,12 +26,9 @@ export interface Context extends Client {
   args?: string[];
 }
 
-export function exec(command: string, options: ExecOptions = {}) {
+export function exec(args: string[], options?: SpawnOptionsWithoutStdio) {
   return new Promise((resolve, reject) => {
-    _exec(command, options, (error, stdout, stderr) => {
-      if (error) return reject(error);
-      resolve(stdout || stderr);
-    });
+    spawn(args.shift(), args, options);
   });
 }
 
@@ -43,7 +41,10 @@ export function fetchExperiments(): Promise<Record<string, any>> {
     .catch(() => ({}));
 }
 
-export async function collectExperiments(experiment, { message, args, api }: Context) {
+export async function collectExperiments(
+  experiment,
+  { message, args, api }: Context
+) {
   const treatments: Record<string, number> = {};
   let ids: string[] = [];
 
