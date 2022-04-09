@@ -3,7 +3,8 @@ import { resolve } from "path";
 import { BASE_DIR } from "../../../../snippets/util/build";
 import { Context, exec } from "../../../util";
 
-export const name = "snippets startup add";
+export const name = "snippets startup delete";
+export const aliases = ["snippets startup remove"];
 export default async function ({ message, args, api }: Context) {
   const { id } = await api.createMessage(message.channel_id, {
     content: "Preparing..."
