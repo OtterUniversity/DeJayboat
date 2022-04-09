@@ -28,7 +28,15 @@ export interface Context extends Client {
 
 export function exec(args: string[], options?: SpawnOptionsWithoutStdio) {
   return new Promise((resolve, reject) => {
-    spawn(args.shift(), args, options);
+    const child = spawn(args.shift(), args, options);
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", data => (stdout += data));
+    child.stderr.on("data", data => (stderr += data));
+
+    child.on("error", reject);
+    child.on("close", code => resolve(code === 0 ? stdout : stderr));
   });
 }
 
@@ -41,10 +49,7 @@ export function fetchExperiments(): Promise<Record<string, any>> {
     .catch(() => ({}));
 }
 
-export async function collectExperiments(
-  experiment,
-  { message, args, api }: Context
-) {
+export async function collectExperiments(experiment, { args }: Context) {
   const treatments: Record<string, number> = {};
   let ids: string[] = [];
 
