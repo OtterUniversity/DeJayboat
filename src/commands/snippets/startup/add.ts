@@ -30,7 +30,7 @@ export default async function ({ message, args, api }: Context) {
       "git",
       "commit",
       "-m",
-      `Helperboat: Add snippet for ${message.author.username}`
+      `Helperboat: Add startup snippet for ${message.author.username}`
     ],
     { cwd: BASE_DIR }
   );
