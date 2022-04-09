@@ -22,8 +22,8 @@ export default async function ({ message, args, api }: Context) {
         "`" +
         id +
         "` is already set to **" +
-        name +
-        "**, please delete it with `.delete " +
+        current +
+        "**, please delete it with `.guilds delete " +
         id +
         "` first",
       allowedMentions: { parse: [] }
