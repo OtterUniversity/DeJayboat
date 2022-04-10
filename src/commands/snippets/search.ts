@@ -11,7 +11,7 @@ export default async function ({ message, args, api }: Context) {
     api.createMessage(message.channel_id, { content: "No query specified" });
   const query = args.join(" ");
 
-  await exec(["git pull"], { cwd: BASE_DIR });
+  await exec(["git", "pull"], { cwd: BASE_DIR });
   const snippets: Snippet[] = JSON.parse(
     await readFile(
       resolve(BASE_DIR, "build", "output", "snippets.json"),
