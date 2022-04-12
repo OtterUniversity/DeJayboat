@@ -5,8 +5,8 @@ export const aliases = ["snippets export"];
 
 export default async function ({ message, api }: Context) {
   const { content } = await api.getChannelMessage(
-    "839367089801527306",
-    "962230362430398484"
+    "843878764282118174",
+    "962470737392852992"
   );
 
   await api.createMessage(message.channel_id, { content });
