@@ -56,7 +56,7 @@ export async function collectExperiments(experiment, { args }: Context) {
   const no = args.includes("-n") || args.includes("--no");
   if (!no) ids = Object.values(experiment.overrides).flat() as string[];
 
-  const yes = args.includes("-y") || args.includes("--yes");
+  const yes = args.includes("-y") || args.includes("--yes") || args.includes("-overrides");
   if (!yes) {
     for await (const id of Object.keys(guilds)) {
       const range = murmurhash.v3(`${experiment.hash}:${id}`) % 1e4;
