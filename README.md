@@ -2,9 +2,9 @@ bot for dejays place
 
 [![dejays place lol](https://inv.wtf/widget/dejay)](https://inv.wtf/dejay)
 
-selfhosting is not reccomended but heres the basics
+selfhosting is not reccomended but here's the basics
 
-> NOTE: there is no support for selhosting, this is meant to be a custom, private bot
+> NOTE: there is no support for selfhosting, this is meant to be a custom, private bot
 
 if you are not an otter university member then clone the snippets repo
 
