@@ -16,7 +16,7 @@ export default async function ({ message, api }: Context) {
       continue;
 
     if (command.owner && !owners.includes(message.author.id)) continue;
-    content += "`" + command.name + "`, ";
+    content += "\n`" + command.name + "`";
   }
 
   content = content.slice(0, -2);
