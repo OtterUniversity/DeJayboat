@@ -19,6 +19,5 @@ export default async function ({ message, api }: Context) {
     content += "\n`" + command.name + "`";
   }
 
-  content = content.slice(0, -2);
   api.createMessage(message.channel_id, { content });
 }
