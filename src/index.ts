@@ -61,6 +61,18 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       svgs.push(...attachments);
     }
 
+    if (message.embeds.length)
+      for (const embed of message.embeds)
+        if (
+          embed.type === "rich" &&
+          embed.url &&
+          embed.url.startsWith("https://twitter.com") &&
+          embed.video
+        )
+          await api.createMessage(message.channel_id, {
+            content: embed.url.replace("twitter.com", "fxtwitter.com")
+          });
+
     if (svgs) {
       const files = [];
       for await (const svg of svgs.slice(0, 10)) {
@@ -88,16 +100,8 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       if (files.length) api.createMessage(message.channel_id, {}, files);
     }
 
-    const tweets = message.content.match(
-      /https?:\/\/twitter\.com\/(?:#!\/)?(?:\w+)\/status(?:es)?\/(?:\d+)/g
-    );
-
-    if (tweets)
-      api.createMessage(message.channel_id, {
-        content: tweets.map(url => url.replace("twitter.com", "fxtwitter.com")).join("\n")
-      });
-
     if (!message.content.startsWith(config.prefix)) return;
+
     let next = message.content.slice(config.prefix.length).trim();
     let command: Command;
     for (const _command of commands) {
@@ -138,6 +142,19 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       });
     }
   }
+
+  if (t === GatewayDispatchEvents.MessageUpdate && d.guild_id)
+    if (d.embeds.length)
+      for (const embed of d.embeds)
+        if (
+          embed.type === "rich" &&
+          embed.url &&
+          embed.url.startsWith("https://twitter.com") &&
+          embed.video
+        )
+          await api.createMessage(d.channel_id, {
+            content: embed.url.replace("twitter.com", "fxtwitter.com")
+          });
 
   if (t === GatewayDispatchEvents.GuildMemberAdd) {
     const member: GatewayGuildMemberAddDispatchData = d;
