@@ -31,7 +31,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       const images = embed?.description?.match(/https?:\/\/\S+\.(png|jpg|jpeg|webp)\b/g);
       if (images) {
         const files = [];
-        for await (const image of images.slice(0, 10)) {
+        for (const image of images.slice(0, 10)) {
           let validImage;
           try {
             new URL(image);
@@ -60,6 +60,18 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       const attachments = message.attachments.map(({ url }) => url);
       svgs.push(...attachments);
     }
+
+    if (message.embeds.length)
+      for (const embed of message.embeds)
+        if (
+          embed.type === "rich" &&
+          embed.url &&
+          embed.url.startsWith("https://twitter.com") &&
+          embed.video
+        )
+          await api.createMessage(message.channel_id, {
+            content: embed.url.replace("twitter.com", "fxtwitter.com")
+          });
 
     if (svgs) {
       const files = [];
