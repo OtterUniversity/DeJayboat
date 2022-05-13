@@ -143,6 +143,19 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     }
   }
 
+  if (t === GatewayDispatchEvents.MessageUpdate && d.guild_id)
+    if (message.embeds.length)
+      for (const embed of message.embeds)
+        if (
+          embed.type === "rich" &&
+          embed.url &&
+          embed.url.startsWith("https://twitter.com") &&
+          embed.video
+        )
+          await api.createMessage(message.channel_id, {
+            content: embed.url.replace("twitter.com", "fxtwitter.com")
+          });
+
   if (t === GatewayDispatchEvents.GuildMemberAdd) {
     const member: GatewayGuildMemberAddDispatchData = d;
     if (member.user.bot) return;
