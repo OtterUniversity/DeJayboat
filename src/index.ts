@@ -73,7 +73,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       if (tweets.length) {
         await api.editMessage(message.channel_id, message.id, { flags: 1 << 2 });
         await api.createMessage(message.channel_id, {
-          content: tweets.map(({ url }) => url.replace("twitter.com", "fxtwitter.com")).join("\n")
+          content: tweets.map(({ url }) => url.replace("twitter.com", "vxtwitter.com")).join("\n")
         });
       }
     }
@@ -161,7 +161,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       if (tweets.length) {
         await api.editMessage(d.channel_id, d.id, { flags: 1 << 2 });
         await api.createMessage(d.channel_id, {
-          content: tweets.map(({ url }) => url.replace("twitter.com", "fxtwitter.com")).join("\n")
+          content: tweets.map(({ url }) => url.replace("twitter.com", "vxtwitter.com")).join("\n")
         });
       }
     }
