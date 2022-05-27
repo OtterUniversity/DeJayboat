@@ -1,5 +1,5 @@
 import { Context, exec } from "../../util";
-import { BASE_DIR } from "../../../snippets/util/build";
+import { BASE_DIR, SNIPPETS_DIR } from "../../../snippets/util/build";
 import { unlink } from "fs/promises";
 import { resolve } from "path";
 
@@ -14,7 +14,7 @@ export default async function ({ message, args, api }: Context) {
   });
 
   await exec(["git", "pull"], { cwd: BASE_DIR });
-  await unlink(resolve(BASE_DIR, `${title}.js`));
+  await unlink(resolve(SNIPPETS_DIR, `${title}.js`));
 
   await api.editMessage(message.channel_id, id, { content: "Uploading..." });
   await exec(["git", "add", "."], { cwd: BASE_DIR });
