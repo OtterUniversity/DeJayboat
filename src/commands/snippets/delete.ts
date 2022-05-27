@@ -3,7 +3,7 @@ import { BASE_DIR } from "../../../snippets/util/build";
 import { unlink } from "fs/promises";
 import { resolve } from "path";
 
-export const name = "snippets add";
+export const name = "snippets delete";
 export default async function ({ message, args, api }: Context) {
   const title = args.shift();
   if (!title)
@@ -23,7 +23,7 @@ export default async function ({ message, args, api }: Context) {
       "git",
       "commit",
       "-m",
-      `Helperboat: Add snippet ${title} for ${message.author.username}`
+      `Helperboat: Delete snippet ${title} for ${message.author.username}`
     ],
     { cwd: BASE_DIR }
   );
