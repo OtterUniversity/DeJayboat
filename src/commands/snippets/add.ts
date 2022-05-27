@@ -1,4 +1,4 @@
-import { BASE_DIR, generate } from "../../../snippets/util";
+import { BASE_DIR, SNIPPETS_DIR, generate } from "../../../snippets/util";
 import { Context, exec } from "../../util";
 import { writeFile } from "fs/promises";
 import { resolve } from "path";
@@ -30,7 +30,7 @@ export default async function ({ message, args, api }: Context) {
     content: "Preparing..."
   });
   await exec(["git", "pull"], { cwd: BASE_DIR });
-  await writeFile(resolve(BASE_DIR, `${title}.js`), file);
+  await writeFile(resolve(SNIPPETS_DIR, `${title}.js`), file);
 
   await api.editMessage(message.channel_id, id, { content: "Uploading..." });
   await exec(["git", "add", "."], { cwd: BASE_DIR });
