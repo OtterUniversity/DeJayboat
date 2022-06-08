@@ -25,7 +25,7 @@ export default async function ({ message, api, ws }: Context) {
   await edit();
 
   const experimentStart = Date.now();
-  await robert.get("https://discord-services.justsomederpyst.repl.co/experiment").send("status");
+  await robert.get("https://discord-services.justsomederpyst.repl.co/experiment").agent("dejayboat/1.0").send("status");
   pings.push(["Experiment", Date.now() - experimentStart]);
   edit();
 }
