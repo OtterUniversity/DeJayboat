@@ -28,7 +28,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     const message: GatewayMessageCreateDispatchData = d;
     if (message.channel_id === config.datamining) {
       const [embed] = message.embeds;
-      const images = embed?.description?.match(/https?:\/\/\S+\.(png|jpg|jpeg|webp)\b/g);
+      const images = embed?.description?.match(/https?:\/\/\S+\.(png|jpg|jpeg|webp|gif)\b/g);
       if (images) {
         const files = [];
         for (const image of images.slice(0, 10)) {
