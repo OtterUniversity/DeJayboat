@@ -65,7 +65,6 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       const tweets = message.embeds.filter(
         embed =>
           embed.type === "rich" &&
-          embed.video &&
           embed.url &&
           embed.url.startsWith("https://twitter.com")
       );
@@ -153,7 +152,6 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       const tweets = d.embeds.filter(
         embed =>
           embed.type === "rich" &&
-          embed.video &&
           embed.url &&
           embed.url.startsWith("https://twitter.com")
       );
@@ -161,7 +159,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       if (tweets.length) {
         await api.editMessage(d.channel_id, d.id, { flags: 1 << 2 });
         await api.createMessage(d.channel_id, {
-          content: tweets.map(({ url }) => url.replace("twitter.com", "vxtwitter.com")).join("\n")
+          content: tweets.map(({ url }) => url.replace("twitter.com", "pxtwitter.com")).join("\n")
         });
       }
     }
