@@ -61,21 +61,22 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       svgs.push(...attachments);
     }
 
-    // if (message.embeds.length) {
-    //   const tweets = message.embeds.filter(
-    //     embed =>
-    //       embed.type === "rich" &&
-    //       embed.url &&
-    //       embed.url.startsWith("https://twitter.com")
-    //   );
+    if (message.embeds.length) {
+      const tweets = message.embeds.filter(
+        embed =>
+          embed.type === "rich" &&
+          embed.url &&
+          embed.url.startsWith("https://twitter.com") &&
+          embed.video
+      );
 
-    //   if (tweets.length) {
-    //     await api.editMessage(message.channel_id, message.id, { flags: 1 << 2 });
-    //     await api.createMessage(message.channel_id, {
-    //       content: tweets.map(({ url }) => url.replace("twitter.com", "pxtwitter.com")).join("\n")
-    //     });
-    //   }
-    // }
+      if (tweets.length) {
+        await api.editMessage(message.channel_id, message.id, { flags: 1 << 2 });
+        await api.createMessage(message.channel_id, {
+          content: tweets.map(({ url }) => url.replace("twitter.com", "pxtwitter.com")).join("\n")
+        });
+      }
+    }
 
     if (svgs) {
       const files = [];
@@ -147,22 +148,23 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     }
   }
 
-  // if (t === GatewayDispatchEvents.MessageUpdate && d.guild_id)
-  //   if (d.embeds.length) {
-  //     const tweets = d.embeds.filter(
-  //       embed =>
-  //         embed.type === "rich" &&
-  //         embed.url &&
-  //         embed.url.startsWith("https://twitter.com")
-  //     );
+  if (t === GatewayDispatchEvents.MessageUpdate && d.guild_id)
+    if (d.embeds.length) {
+      const tweets = d.embeds.filter(
+        embed =>
+          embed.type === "rich" &&
+          embed.url &&
+          embed.url.startsWith("https://twitter.com") &&
+          embed.video
+      );
 
-  //     if (tweets.length) {
-  //       await api.editMessage(d.channel_id, d.id, { flags: 1 << 2 });
-  //       await api.createMessage(d.channel_id, {
-  //         content: tweets.map(({ url }) => url.replace("twitter.com", "pxtwitter.com")).join("\n")
-  //       });
-  //     }
-  //   }
+      if (tweets.length) {
+        await api.editMessage(d.channel_id, d.id, { flags: 1 << 2 });
+        await api.createMessage(d.channel_id, {
+          content: tweets.map(({ url }) => url.replace("twitter.com", "pxtwitter.com")).join("\n")
+        });
+      }
+    }
 
   if (t === GatewayDispatchEvents.GuildMemberAdd) {
     const member: GatewayGuildMemberAddDispatchData = d;

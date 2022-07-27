@@ -12,6 +12,6 @@ export default function ({ message, api }: Context) {
     content = "fuck off you are tiemen too, but here you go";
   else content = "here is the source 👽";
 
-  content += " https://github.com/Commandtechno/DeJayboat";
+  content += " https://github.com/OtterUniversity/DeJayboat";
   api.createMessage(message.channel_id, { content });
 }
