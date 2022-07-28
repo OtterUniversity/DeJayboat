@@ -25,6 +25,10 @@ export default async function ({ message, args, api }: Context) {
   });
 
   const results = engine.search(query);
+
+  if (!message.channel_id === '839367089801527306' | message.channel_id === '869824434612076555' | message.channel_id === '844121588177829938')
+    return api.createMessage(message.channel_id, { content: "👽 Missing permissions" })
+
   if (!results.length)
     return api.createMessage(message.channel_id, {
       content: "No results found"
@@ -44,17 +48,13 @@ export default async function ({ message, args, api }: Context) {
 
     if (member) {
       avatar = member.avatar
-        ? `https://cdn.discordapp.com/guilds/${message.guild_id}/users/${
-            member.user.id
-          }/avatars/${member.avatar}.${
-            member.avatar.startsWith("a_") ? "gif" : "png"
-          }`
+        ? `https://cdn.discordapp.com/guilds/${message.guild_id}/users/${member.user.id
+        }/avatars/${member.avatar}.${member.avatar.startsWith("a_") ? "gif" : "png"
+        }`
         : member.user.avatar
-        ? `https://cdn.discordapp.com/avatars/${member.user.id}/${
-            member.user.avatar
+          ? `https://cdn.discordapp.com/avatars/${member.user.id}/${member.user.avatar
           }.${member.user.avatar.startsWith("a_") ? "gif" : "png"}`
-        : `https://cdn.discordapp.com/embed/avatars/${
-            member.user.discriminator % 5
+          : `https://cdn.discordapp.com/embed/avatars/${member.user.discriminator % 5
           }.png`;
     }
   }
