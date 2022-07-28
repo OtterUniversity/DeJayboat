@@ -26,7 +26,7 @@ export default async function ({ message, args, api }: Context) {
 
   const results = engine.search(query);
 
-  if (!message.channel_id === '839367089801527306' | message.channel_id === '869824434612076555' | message.channel_id === '844121588177829938')
+  if (!message.channel_id === '839367089801527306' || message.channel_id === '869824434612076555' || message.channel_id === '844121588177829938')
     return api.createMessage(message.channel_id, { content: "👽 Missing permissions" })
 
   if (!results.length)
