@@ -5,6 +5,7 @@ import { resolve } from "path";
 import Fuse from "fuse.js";
 
 export const name = "snippets search";
+export const aliases = ["snippets get"];
 
 export default async function ({ message, args, api }: Context) {
   if (!args.length)
