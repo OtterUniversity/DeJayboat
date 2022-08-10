@@ -67,7 +67,7 @@ export default async function ({ message, args, api }: Context) {
 
   const uploaded = await api.createMessage(
     message.channel_id,
-    { content: `\`.snippet build ${query}\` triggered by ${message.author}` },
+    { content: `\`.snippet build ${query}\` triggered by ${message.author.username}` },
     { name: item.title + ".js", value: item.code }
   )
 
