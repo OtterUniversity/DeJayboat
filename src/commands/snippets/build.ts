@@ -65,11 +65,11 @@ export default async function ({ message, args, api }: Context) {
     }
   }
 
-  /*const uploaded = await api.createMessage(
-    '843878764282118174',
-    { content: `\`.snippet build ${query}\` triggered by ${item.author}` },
+  const uploaded = await api.createMessage(
+    message.channel_id,
+    { content: `\`.snippet build ${query}\` triggered by ${message.author}` },
     { name: item.title + ".js", value: item.code }
-  )*/
+  )
 
   await api.createMessage(
     message.channel_id,
