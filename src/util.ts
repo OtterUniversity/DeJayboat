@@ -3,13 +3,12 @@ export const snowflakeRegex = /\b\d{17,19}\b/g;
 export const color = parseInt("36393f", 16);
 
 // Thanks Geek :) - https://git.io/Jz9RC
-export const inviteRegex =
-  /discord(?:app)?\.(?:com|gg)\/(?:invite\/)?(?<code>[\w-]{1,25})/;
+export const inviteRegex = /discord(?:app)?\.(?:com|gg)\/(?:invite\/)?(?<code>[\w-]{1,25})/;
 
 import murmurhash from "murmurhash";
 import ottercord from "ottercord";
 
-import { EXPERIMENT_API_TOKEN } from './config'
+import { experiment_api_token } from "./config";
 import { GatewayMessageCreateDispatchData } from "discord-api-types";
 import { SpawnOptionsWithoutStdio, spawn } from "child_process";
 import { Gateway } from "detritus-client-socket";
@@ -46,7 +45,7 @@ export function fetchExperiments(): Promise<Record<string, any>> {
     .get("https://discord-services.justsomederpyst.repl.co/experiment")
     .query("with_metadata", true)
     .agent("dejayboat/1.0")
-    .auth(EXPERIMENT_API_TOKEN)
+    .auth(experiment_api_token)
     .send("json")
     .catch(() => ({}));
 }
