@@ -9,6 +9,7 @@ export const inviteRegex =
 import murmurhash from "murmurhash";
 import ottercord from "ottercord";
 
+import { EXPERIMENT_API_TOKEN } from './config'
 import { GatewayMessageCreateDispatchData } from "discord-api-types";
 import { SpawnOptionsWithoutStdio, spawn } from "child_process";
 import { Gateway } from "detritus-client-socket";
@@ -45,6 +46,7 @@ export function fetchExperiments(): Promise<Record<string, any>> {
     .get("https://discord-services.justsomederpyst.repl.co/experiment")
     .query("with_metadata", true)
     .agent("dejayboat/1.0")
+    .auth(EXPERIMENT_API_TOKEN)
     .send("json")
     .catch(() => ({}));
 }
