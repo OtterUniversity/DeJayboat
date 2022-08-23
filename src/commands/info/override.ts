@@ -13,7 +13,7 @@ interface FireOverride {
   experiment: number;
   id: number;
   releaseChannel: string;
-  validForUserIds: string[];
+  validForUserIds?: string[];
 }
 
 export const name = "override";
