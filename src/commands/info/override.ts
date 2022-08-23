@@ -133,7 +133,7 @@ export default function ({ message, args, api }: Context) {
             },
             {
               name: "Users",
-              value: !!data.validForUserIds ? data.validForUserIds.map(id => `<@${id}>`).join("\n") : "None"
+              value: data.validForUserIds.length ? data.validForUserIds.map(id => `<@${id}>`).join("\n") : "None"
             }
           ]
         }
