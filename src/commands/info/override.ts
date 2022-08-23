@@ -73,7 +73,7 @@ export default function ({ message, args, api }: Context) {
           fields: [
             {
               name: "Users",
-              value: data.validForUserIds.join("\n") || "None",
+              value: data.validForUserIds.map(id => `<@${id}>`).join("\n") || "None",
               inline: true
             },
             {
@@ -133,7 +133,7 @@ export default function ({ message, args, api }: Context) {
             },
             {
               name: "Users",
-              value: data.validForUserIds.join("\n") || "None"
+              value: data.validForUserIds.map(id => `<@${id}>`).join("\n") || "None"
             }
           ]
         }
