@@ -4,7 +4,8 @@ import {
   UserFlags,
   GatewayDispatchEvents,
   GatewayMessageCreateDispatchData,
-  GatewayGuildMemberAddDispatchData
+  GatewayGuildMemberAddDispatchData,
+  MessageFlags
 } from "discord-api-types/v9";
 import { Gateway } from "detritus-client-socket";
 import { shutdown } from "./store.js";
@@ -71,9 +72,9 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       );
 
       if (tweets.length) {
-        await api.editMessage(message.channel_id, message.id, { flags: 1 << 2 });
+        await api.editMessage(message.channel_id, message.id, { flags: MessageFlags.SuppressEmbeds });
         await api.createMessage(message.channel_id, {
-          content: tweets.map(({ url }) => url.replace("twitter.com", "pxtwitter.com")).join("\n")
+          content: tweets.map(({ url }) => url.replace("twitter.com", "fxtwitter.com")).join("\n")
         });
       }
     }
@@ -159,9 +160,9 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       );
 
       if (tweets.length) {
-        await api.editMessage(d.channel_id, d.id, { flags: 1 << 2 });
+        await api.editMessage(d.channel_id, d.id, { flags: MessageFlags.SuppressEmbeds });
         await api.createMessage(d.channel_id, {
-          content: tweets.map(({ url }) => url.replace("twitter.com", "pxtwitter.com")).join("\n")
+          content: tweets.map(({ url }) => url.replace("twitter.com", "fxtwitter.com")).join("\n")
         });
       }
     }
