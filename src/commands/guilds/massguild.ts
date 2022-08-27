@@ -1,15 +1,11 @@
-import {
-  Context,
-  fetchExperiments,
-  snowflakeRegex,
-  color,
-  collectExperiments,
-} from "../../util";
+import { Context, fetchExperiments, snowflakeRegex, color, collectExperiments } from "../../util";
 import { guilds, updateGuilds } from "../../store";
 import robert from "robert";
 
 import fuse from "fuse.js";
 import murmurhash from "murmurhash";
+import { shitty_discord_scraper } from "../../config";
+import { load } from "cheerio";
 
 export const name = "massguild";
 export const aliases = ["guildinfo", "gi"];
@@ -41,7 +37,7 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
 
   try {
     const {
-      guild: { name },
+      guild: { name }
     } = await robert
       .get("https://mee6.xyz/api/plugins/levels/leaderboard/" + id)
       .query("limit", 1)
@@ -52,6 +48,16 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
   } catch ({ status }) {
     if (status === 429) ratelimited = "🕓 MEE6 Ratelimited";
   }
+
+  try {
+    const name = await robert
+      .get(`${shitty_discord_scraper}/guild/${id}`)
+      .send("text")
+      .then(html => load(html)(".profile-username > p").html());
+
+    guilds[id] = name;
+    return name + "#";
+  } catch {}
 
   return ratelimited ?? "🔒 Private";
 }
@@ -64,15 +70,13 @@ export default async function ({ message, args, api }: Context) {
     const [attachment] = message.attachments;
     if (!attachment?.content_type.endsWith("charset=utf-8"))
       return api.createMessage(message.channel_id, {
-        content: "No input found",
+        content: "No input found"
       });
 
     input = await robert.get(attachment.url).send("text");
   }
 
-  const ids = new Map<string, null | string>(
-    input.match(snowflakeRegex)?.map((key) => [key, null])
-  );
+  const ids = new Map<string, null | string>(input.match(snowflakeRegex)?.map(key => [key, null]));
 
   if (!ids.size) {
     let hashed = args[0];
@@ -83,43 +87,42 @@ export default async function ({ message, args, api }: Context) {
     if (!experiment) {
       // @ts-ignore again i dont want to enable esmoduleinterp
       const engine = new fuse(Object.values(experiments), {
-        keys: ["metadata.title"],
+        keys: ["metadata.title"]
       });
 
       const search = engine.search(args.join(" "));
       if (!search.length)
         return api.createMessage(message.channel_id, {
-          content: "No experiment matched that query",
+          content: "No experiment matched that query"
         });
 
       experiment = search[0].item;
     }
 
     await api.createMessage(message.channel_id, {
-      content:
-        "Getting guilds in experiment **" + experiment.metadata.title + "**",
+      content: "Getting guilds in experiment **" + experiment.metadata.title + "**"
     });
 
     const experimentGuilds = await collectExperiments(experiment, {
       message,
       args,
-      api,
+      api
     });
 
     if (!experimentGuilds.ids.length)
       return api.createMessage(message.channel_id, { content: "No IDs found" });
 
-    experimentGuilds.ids.forEach((id) => ids.set(id, null));
+    experimentGuilds.ids.forEach(id => ids.set(id, null));
     treatments = experimentGuilds.treatments;
   }
 
   if (ids.size > 1000)
     return api.createMessage(message.channel_id, {
-      content: "Cannot lookup more than 1000 guilds",
+      content: "Cannot lookup more than 1000 guilds"
     });
 
   const pending = await api.createMessage(message.channel_id, {
-    content: "🔍 Loading...",
+    content: "🔍 Loading..."
   });
 
   function render() {
@@ -127,7 +130,7 @@ export default async function ({ message, args, api }: Context) {
     let body = "";
 
     for (const [id, value] of ids.entries()) {
-      if (value) completed++
+      if (value) completed++;
       body += "`" + id + "` " + (value ?? "🔍 Loading...");
       const treatment = treatments[id];
       if (treatment) body += " (" + treatment + ")";
@@ -171,10 +174,10 @@ export default async function ({ message, args, api }: Context) {
           description: body,
           title: "🔍 Looking up **" + ids.size + "** guilds",
           footer: {
-            text: "* = From Preview | ^ = From Widget | % = From MEE6",
-          },
-        },
-      ],
+            text: "* = From Preview | ^ = From Widget | % = From MEE6 | # = From Shitty Discord Scraper"
+          }
+        }
+      ]
     });
   }
 
@@ -199,10 +202,10 @@ export default async function ({ message, args, api }: Context) {
           description: body,
           title: "✅ Looked up **" + ids.size + "** guilds",
           footer: {
-            text: "* = From Preview | ^ = From Widget | % = From MEE6",
-          },
-        },
-      ],
+            text: "* = From Preview | ^ = From Widget | % = From MEE6"
+          }
+        }
+      ]
     },
     file
   );
