@@ -50,6 +50,20 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
   }
 
   try {
+    const vanity = await robert
+      .get("https://discord.com/servers/" + id)
+      .send("text", true)
+      .then(url => url.split("/").at(-1))
+    
+    const { guild } = await api.getInvite(vanity);
+
+    guilds[id] = guild.name
+    return name
+  } catch ({ status }) {
+    if (status === 429) ratelimited = "🕓 Server Pages Ratelimited";
+  }
+
+  try {
     const name = await robert
       .get(`${shitty_discord_scraper}/guild/${id}`)
       .send("text")
