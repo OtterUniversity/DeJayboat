@@ -9,7 +9,7 @@ export const aliases = ["inviteinfo", "inv", "ii", "i"];
 export default async function ({ message, args, api }: Context) {
   let url = args.join(" ");
   if (!url) return api.createMessage(message.channel_id, { content: "No invite specified" });
-  if (/^\w{2,32}$/.test(url)) url = "discord.gg/" + url;
+  if (/^[\w-]{2,32}$/.test(url)) url = "discord.gg/" + url;
   if (!inviteRegex.test(url))
     return api.createMessage(message.channel_id, {
       content: "Invalid invite"
