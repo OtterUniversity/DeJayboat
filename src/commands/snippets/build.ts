@@ -33,7 +33,7 @@ export default async function ({ message, args, api }: Context) {
   const results = engine.search(query);
   const category = await api.getChannel(message.channel_id).then((res) => res.parent_id)
 
-  if (!category || category !== "839366943890472960")
+  if (category !== "839366943890472960")
     return api.createMessage(message.channel_id, { content: "👽 Missing permissions" })
 
   if (!results.length)
