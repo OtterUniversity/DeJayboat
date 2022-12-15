@@ -443,13 +443,18 @@ export const open = true;
 export const name = "ye";
 export const aliases = ["kanye"];
 export default async function ({ message, api }: Context) {
-  const quote =
-    Math.random() < 0.1
-      ? HITLER_QUOTES[Math.floor(Math.random() * HITLER_QUOTES.length)]
-      : await robert
-          .get("https://api.kanye.rest")
-          .send("json")
-          .then(res => res.quote);
+  const isHitler = Math.random() < 0.1;
+  const quote = isHitler
+    ? HITLER_QUOTES[Math.floor(Math.random() * HITLER_QUOTES.length)]
+    : await robert
+        .get("https://api.kanye.rest")
+        .send("json")
+        .then(res => res.quote);
 
-  await api.createMessage(message.channel_id, { content: quote });
+  const { id } = await api.createMessage(message.channel_id, { content: quote });
+  setTimeout(
+    () =>
+      api.editMessage(message.channel_id, id, { content: `${quote} - ${isHitler ? "Adolf Hitler" : "Kanye West"}` }),
+    5000
+  );
 }
