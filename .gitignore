@@ -2,3 +2,4 @@ config.ts
 node_modules/
 build/
 store/
+snippets
