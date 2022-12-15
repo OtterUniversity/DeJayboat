@@ -446,9 +446,10 @@ export default async function ({ message, api }: Context) {
   const quote =
     Math.random() < 0.1
       ? HITLER_QUOTES[Math.floor(Math.random() * HITLER_QUOTES.length)]
-      : await fetch("https://api.kanye.rest")
-          .then(res => res.json())
+      : await robert
+          .get("https://api.kanye.rest")
+          .send("json")
           .then(res => res.quote);
 
-  const { id } = await api.createMessage(message.channel_id, { content: quote });
+  await api.createMessage(message.channel_id, { content: quote });
 }
