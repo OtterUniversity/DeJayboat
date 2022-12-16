@@ -17,7 +17,7 @@ export default async function ({ message, args, api, ws }: Context) {
     let out = eval(args.join(" "));
     if (out instanceof Promise) {
       api.createMessage(message.channel_id, {
-        content: "<a:crumbdance:877043850890317855> Resolving Promise"
+        content: "<a:crumbdance:877043850890317855> Resolving <@110090225929191424>"
       });
 
       try {
