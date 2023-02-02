@@ -17,7 +17,7 @@ export default async function ({ message, args, api, ws }: Context) {
     let out = eval(args.join(" "));
     if (out instanceof Promise) {
       api.createMessage(message.channel_id, {
-        content: "<a:crumbdance:877043850890317855> @everyone *we do a bit of trolling*"
+        content: "<a:crumbdance:877043850890317855>"
       });
 
       try {
