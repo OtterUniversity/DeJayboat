@@ -26,7 +26,7 @@ export default async function ({ message, args, api }: Context) {
       {
         username: "(real)",
         avatarUrl: "https://cdn.discordapp.com/emojis/808831739614724186.png",
-        content: "!!appinfo " + id
+        content: `!!appinfo ${id} <@398690824721924107>`
       },
       { wait: true }
     );
