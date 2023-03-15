@@ -62,7 +62,38 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       svgs.push(...attachments);
     }
 
+    if (message.content.includes("https://spotify.link/")) {
+      const [short] = message.content.match(/https:\/\/spotify\.link\/.{11}/g) ?? []
+      let spotify;
+      await robert
+        .head(short)
+        .full()
+        .send()
+        .then(res => 
+          spotify = res.headers.location
+        )
+        .catch(() => {});
+      await api.createMessage(message.channel_id, {
+        content: spotify
+      });
+    }
+
     if (message.embeds.length) {
+      const tiktoks = message.embeds.filter(
+        embed =>
+          embed.provider &&
+          embed.provider.name === "TikTok" &&
+          embed.url &&
+          embed.url.includes("tiktok.com")
+      );
+
+      if (tiktoks.length) {
+        await api.editMessage(message.channel_id, message.id, { flags: MessageFlags.SuppressEmbeds });
+        await api.createMessage(message.channel_id, {
+          content: tiktoks.map(({ url }) => url.replace("tiktok.com", "tiktxk.com")).join("\n")
+        });
+      }
+
       const tweets = message.embeds.filter(
         embed =>
           embed.type === "rich" &&
