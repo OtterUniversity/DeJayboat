@@ -63,20 +63,18 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     }
 
     if (message.content.includes("https://spotify.link/")) {
-      const spotifyShort = message.content.match(/https:\/\/spotify\.link\/.{11}/g) ?? []
-      const spotifyLong = [];
-      for (const short of spotifyShort) {
-        await robert
-          .head(short)
-          .full()
-          .send()
-          .then(res => 
-            spotifyLong.push(res.headers.location)
-          )
-          .catch(() => {});
-      }
+      const [short] = message.content.match(/https:\/\/spotify\.link\/.{11}/g) ?? []
+      let spotify;
+      await robert
+        .head(short)
+        .full()
+        .send()
+        .then(res => 
+          spotify = res.headers.location
+        )
+        .catch(() => {});
       await api.createMessage(message.channel_id, {
-        content: spotifyLong.join("\n")
+        content: spotify
       });
     }
 
