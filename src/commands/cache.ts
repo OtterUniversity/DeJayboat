@@ -6,7 +6,14 @@ export const name = "cache";
 export const aliases = ["cacheuser"];
 export default async function ({ message, args, api }: Context) {
   const userId = args[0];
-  if (!userId || !/^\d+/.test(userId)) return api.createMessage(message.channel_id, { content: "Invalid user" });
+  if (!userId || !/^\d+$/.test(userId)) return api.createMessage(message.channel_id, { content: "Invalid user" });
+
+  try {
+    await api.getUser(userId);
+  } catch {
+    await api.createMessage(message.channel_id, { content: "kys" });
+    return;
+  }
 
   try {
     await api.getGuildMember(message.guild_id, userId);
