@@ -51,7 +51,7 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
 
   try {
     const name = await robert
-      .get(`${shitty_discord_scraper}/guild/${id}`)
+      .get(`${shitty_discord_scraper}/guilds/${id}`)
       .send("text")
       .then(html => load(html)(".profile-username > p").html());
 
@@ -109,8 +109,7 @@ export default async function ({ message, args, api }: Context) {
       api
     });
 
-    if (!experimentGuilds.ids.length)
-      return api.createMessage(message.channel_id, { content: "No IDs found" });
+    if (!experimentGuilds.ids.length) return api.createMessage(message.channel_id, { content: "No IDs found" });
 
     experimentGuilds.ids.forEach(id => ids.set(id, null));
     treatments = experimentGuilds.treatments;
@@ -139,14 +138,7 @@ export default async function ({ message, args, api }: Context) {
 
     const percent = Math.round((completed / ids.size) * 10);
     const progress =
-      "(`" +
-      completed +
-      "/" +
-      ids.size +
-      "`) [" +
-      "⬜".repeat(percent) +
-      "🔳".repeat(10 - percent) +
-      "] ";
+      "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(10 - percent) + "] ";
 
     return { completed, body, percent, progress };
   }
