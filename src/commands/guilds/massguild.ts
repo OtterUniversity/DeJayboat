@@ -8,7 +8,7 @@ import { shitty_discord_scraper } from "../../config";
 import { load } from "cheerio";
 
 export const name = "massguild";
-export const aliases = ["guildinfo", "gi"];
+export const aliases = ["guildinfo", "gi", "assguild"];
 
 async function resolve(id: string, api: Context["api"]): Promise<string> {
   let ratelimited: string;
