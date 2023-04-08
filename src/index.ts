@@ -5,7 +5,8 @@ import {
   GatewayDispatchEvents,
   GatewayMessageCreateDispatchData,
   GatewayGuildMemberAddDispatchData,
-  MessageFlags
+  MessageFlags,
+  GatewayMessageUpdateDispatchData
 } from "discord-api-types/v9";
 import { Gateway } from "detritus-client-socket";
 import { shutdown } from "./store.js";
@@ -186,9 +187,17 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     }
   }
 
-  if (t === GatewayDispatchEvents.MessageUpdate && d.guild_id)
-    if (d.embeds.length) {
-      const tweets = d.embeds.filter(
+  if (t === GatewayDispatchEvents.MessageUpdate && d.guild_id) {
+    const updated_message: GatewayMessageUpdateDispatchData = d;
+    if (updated_message.channel_id === '1094133074243108954') { // TODO: Move to config :)
+      const content = updated_message.content?.toLowerCase();
+      if (content !== ("5")) {
+        api.deleteMessage(updated_message.channel_id, updated_message.id);
+      }
+    }
+
+    if (updated_message.embeds.length) {
+      const tweets = updated_message.embeds.filter(
         embed =>
           embed.url &&
           embed.url.startsWith("https://twitter.com") &&
@@ -196,12 +205,13 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       );
 
       if (tweets.length) {
-        await api.editMessage(d.channel_id, d.id, { flags: MessageFlags.SuppressEmbeds });
-        await api.createMessage(d.channel_id, {
+        await api.editMessage(updated_message.channel_id, updated_message.id, { flags: MessageFlags.SuppressEmbeds });
+        await api.createMessage(updated_message.channel_id, {
           content: tweets.map(({ url }) => url.replace("twitter.com", "fxtwitter.com")).join("\n")
         });
       }
     }
+  }
 
   if (t === GatewayDispatchEvents.GuildMemberAdd) {
     const member: GatewayGuildMemberAddDispatchData = d;
