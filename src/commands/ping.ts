@@ -1,7 +1,7 @@
-import { APIMessage } from "discord-api-types";
 import { Context } from "../util";
 import robert from "robert";
 import { experiment_api_token } from "../config";
+import { APIMessage } from "discord-api-types/v9";
 
 export const open = true;
 export const name = "ping";

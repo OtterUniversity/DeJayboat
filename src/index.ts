@@ -56,6 +56,13 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       }
     }
 
+    if (message.channel_id === '1094133074243108954') { // TODO: Move to config :)
+      const content = message.content?.toLowerCase();
+      if (content !== ("5")) {
+        api.deleteMessage(message.channel_id, message.id);
+      }
+    }
+
     const svgs = message.content.match(/https?:\/\/\S+\.svg\b/g) ?? [];
     if (message.attachments.length) {
       const attachments = message.attachments.map(({ url }) => url);
@@ -64,7 +71,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
 
     if (message.content.includes("https://spotify.link/")) {
       const [short] = message.content.match(/https:\/\/spotify\.link\/.{11}/g) ?? []
-      let spotify;
+      let spotify: string;
       await robert
         .head(short)
         .full()
@@ -96,7 +103,6 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
 
       const tweets = message.embeds.filter(
         embed =>
-          embed.type === "rich" &&
           embed.url &&
           embed.url.startsWith("https://twitter.com") &&
           embed.video
@@ -113,7 +119,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     if (svgs) {
       const files = [];
       for await (const svg of svgs.slice(0, 10)) {
-        let validSvg;
+        let validSvg: boolean;
         try {
           new URL(svg);
           validSvg = true;
@@ -184,7 +190,6 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     if (d.embeds.length) {
       const tweets = d.embeds.filter(
         embed =>
-          embed.type === "rich" &&
           embed.url &&
           embed.url.startsWith("https://twitter.com") &&
           embed.video

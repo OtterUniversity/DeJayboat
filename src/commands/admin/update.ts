@@ -20,6 +20,7 @@ export default async function ({ message, api }: Context) {
   await api.editMessage(message.channel_id, updateMessage.id, {
     content: "Compiling typescript"
   });
+  
   exec("npm run build");
 
   await api.editMessage(message.channel_id, updateMessage.id, { content: "Exiting process" });

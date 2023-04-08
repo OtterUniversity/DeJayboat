@@ -9,7 +9,7 @@ import murmurhash from "murmurhash";
 import ottercord from "ottercord";
 
 import { experiment_api_token } from "./config";
-import { GatewayMessageCreateDispatchData } from "discord-api-types";
+import { GatewayMessageCreateDispatchData } from "discord-api-types/v9";
 import { SpawnOptionsWithoutStdio, spawn } from "child_process";
 import { Gateway } from "detritus-client-socket";
 import robert from "robert";

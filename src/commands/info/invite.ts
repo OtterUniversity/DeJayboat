@@ -1,6 +1,6 @@
 import { Context, inviteRegex, color } from "../../util";
 import { guilds, updateGuilds } from "../../store";
-import { APIInvite } from "discord-api-types";
+import { APIInvite } from "discord-api-types/v9";
 
 const VerificationLevels = ["None", "Low", "Medium", "High", "Very High"];
 

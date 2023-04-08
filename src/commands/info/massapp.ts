@@ -1,5 +1,5 @@
 import { Context, snowflakeRegex } from "../../util";
-import { APIMessage, RESTGetAPIChannelWebhooksResult } from "discord-api-types";
+import { APIMessage, RESTGetAPIChannelWebhooksResult } from "discord-api-types/v9";
 
 export const name = "massapp";
 export const aliases = ["appinfo", "ai"];

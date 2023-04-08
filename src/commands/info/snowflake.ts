@@ -1,6 +1,6 @@
 import { Context, exactSnowflakeRegex } from "../../util";
 import { DiscordSnowflake } from "@sapphire/snowflake";
-import { APIMessage } from "discord-api-types";
+import { APIMessage } from "discord-api-types/v9";
 import robert from "robert";
 
 const Snowflake = DiscordSnowflake;
