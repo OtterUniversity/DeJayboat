@@ -63,7 +63,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       }
     }
 
-    const svgs = message.content.match(/https?:\/\/\S+\.svg\b/g) ?? [];
+    const svgs = message.content.match(/https?:\/\/\S+\.svg\b/g);
     if (message.attachments.length) {
       const attachments = message.attachments.map(({ url }) => url);
       svgs.push(...attachments);
