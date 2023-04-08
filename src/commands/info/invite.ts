@@ -73,7 +73,8 @@ export default async function ({ message, args, api }: Context) {
               invite.approximate_presence_count +
               "`"
           },
-          {
+          // discord-api-types sucks. guild.welcome_screen is clearly defined https://discord.com/api/v9/invites/overwatch, but it's not in the type
+          /*{ 
             name: "Welcome Screen",
             value: guild.welcome_screen?.description || "No welcome screen"
           },
@@ -88,7 +89,7 @@ export default async function ({ message, args, api }: Context) {
                   return res;
                 })
                 .join("\n") || "No welcome channels"
-          },
+          },*/
           {
             name: "Features",
             value: guild.features
