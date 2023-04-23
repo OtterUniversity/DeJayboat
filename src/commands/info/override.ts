@@ -61,8 +61,9 @@ export default function ({ message, args, api }: Context) {
       value: "`" + target.type + "` " + target.id
     }));
 
+    const dataStr = JSON.stringify(data, null, 2)
     api.createMessage(message.channel_id, {
-      content: "```json\n" + JSON.stringify(data, null, 2) + "```",
+      content: dataStr.length < 1000 ? "```json\n" + JSON.stringify(data, null, 2) + "```" : 1000,
       embeds: [
         {
           color,
@@ -90,7 +91,7 @@ export default function ({ message, args, api }: Context) {
           ]
         }
       ]
-    });
+    }, dataStr.length < 1000 ? null : { name: 'override.json', value: JSON.stringify(data, null, 2) });
   } else if (url.hostname === "inv.wtf") {
     let decoded: string;
     try {
