@@ -71,12 +71,8 @@ export default function ({ message, args, api }: Context) {
           footer: {
             text: "Expires"
           },
+          description: data.validForUserIds.map(id => `<@${id}>`).join("\n").slice(0, 4000) || "None
           fields: [
-            {
-              name: "Users",
-              value: data.validForUserIds.map(id => `<@${id}>`).join("\n").slice(0, 1000) || "None",
-              inline: true
-            },
             {
               name: "Release Channel",
               value: data.releaseChannel ?? "None",
