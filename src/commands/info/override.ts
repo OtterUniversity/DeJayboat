@@ -63,7 +63,7 @@ export default function ({ message, args, api }: Context) {
 
     const dataStr = JSON.stringify(data, null, 2)
     api.createMessage(message.channel_id, {
-      content: dataStr.length < 1000 ? "```json\n" + JSON.stringify(data, null, 2) + "```" : 1000,
+      content: dataStr.length < 1000 ? "```json\n" + JSON.stringify(data, null, 2) + "```" : "",
       embeds: [
         {
           color,
