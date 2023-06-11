@@ -30,56 +30,53 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     const message: GatewayMessageCreateDispatchData = d;
     if (message.channel_id === config.datamining) {
       const [embed] = message.embeds;
-      const images = embed?.description?.match(/https?:\/\/\S+\.(png|jpg|jpeg|webp|gif)\b/g);
+      if (!embed?.description) return;
+
+      const mdImageRegex = /!\[.*?\]\((?<image>.*?)\)/g;
+      const htmlImageRegex = /<img.*?src="(?<image>.*?)"/g;
+
+      let match;
+      let images = [];
+
+      while ((match = mdImageRegex.exec(embed.description))) images.push(match.groups.image);
+      while ((match = htmlImageRegex.exec(embed.description))) images.push(match.groups.image);
+
       if (images) {
-        const files = [];
         for (const image of images.slice(0, 10)) {
-          let validImage;
           try {
             new URL(image);
-            validImage = true;
-          } catch {}
+          } catch {
+            break;
+          }
 
-          if (validImage)
-            await robert
-              .get(image)
-              .send("buffer")
-              .then(value =>
-                files.push({
-                  name: "image" + files.length + "." + image.split(".").pop(),
-                  value
-                })
-              )
-              .catch(() => {});
+          // todo: check if the image url is valid?
+          await api.createMessage(message.channel_id, { content: image });
         }
-
-        if (files.length) api.createMessage(message.channel_id, {}, files);
       }
     }
 
-    if (message.channel_id === '1094133074243108954') { // TODO: Move to config :)
+    if (message.channel_id === "1094133074243108954") {
+      // TODO: Move to config :)
       const content = message.content?.toLowerCase();
-      if (content !== ("5")) {
+      if (content !== "5") {
         api.deleteMessage(message.channel_id, message.id);
       }
     }
 
-    const svgs = message.content.match(/https?:\/\/\S+\.svg\b/g);
+    const svgs: string[] = message.content.match(/https?:\/\/\S+\.svg\b/g) ?? [];
     if (message.attachments.length) {
       const attachments = message.attachments.map(({ url }) => url);
       svgs.push(...attachments);
     }
 
     if (message.content.includes("https://spotify.link/")) {
-      const [short] = message.content.match(/https:\/\/spotify\.link\/.{11}/g) ?? []
+      const [short] = message.content.match(/https:\/\/spotify\.link\/.{11}/g) ?? [];
       let spotify: string;
       await robert
         .head(short)
         .full()
         .send()
-        .then(res => 
-          spotify = res.headers.location
-        )
+        .then(res => (spotify = res.headers.location))
         .catch(() => {});
       await api.createMessage(message.channel_id, {
         content: spotify
@@ -88,11 +85,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
 
     if (message.embeds.length) {
       const tiktoks = message.embeds.filter(
-        embed =>
-          embed.provider &&
-          embed.provider.name === "TikTok" &&
-          embed.url &&
-          embed.url.includes("tiktok.com")
+        embed => embed.provider && embed.provider.name === "TikTok" && embed.url && embed.url.includes("tiktok.com")
       );
 
       if (tiktoks.length) {
@@ -103,10 +96,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       }
 
       const tweets = message.embeds.filter(
-        embed =>
-          embed.url &&
-          embed.url.startsWith("https://twitter.com") &&
-          embed.video
+        embed => embed.url && embed.url.startsWith("https://twitter.com") && embed.video
       );
 
       if (tweets.length) {
@@ -166,11 +156,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     }
 
     if (!command) return;
-    if (
-      !command.open &&
-      !config.owners.includes(message.author.id) &&
-      !message.member.roles.includes(config.role)
-    )
+    if (!command.open && !config.owners.includes(message.author.id) && !message.member.roles.includes(config.role))
       return api.createMessage(message.channel_id, { content: "👽 Missing permissions" });
 
     if (command.owner && !config.owners.includes(message.author.id))
@@ -189,19 +175,17 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
 
   if (t === GatewayDispatchEvents.MessageUpdate && d.guild_id) {
     const updated_message: GatewayMessageUpdateDispatchData = d;
-    if (updated_message.channel_id === '1094133074243108954') { // TODO: Move to config :)
+    if (updated_message.channel_id === "1094133074243108954") {
+      // TODO: Move to config :)
       const content = updated_message.content?.toLowerCase();
-      if (content !== ("5")) {
+      if (content !== "5") {
         api.deleteMessage(updated_message.channel_id, updated_message.id);
       }
     }
 
     if (updated_message.embeds.length) {
       const tweets = updated_message.embeds.filter(
-        embed =>
-          embed.url &&
-          embed.url.startsWith("https://twitter.com") &&
-          embed.video
+        embed => embed.url && embed.url.startsWith("https://twitter.com") && embed.video
       );
 
       if (tweets.length) {
