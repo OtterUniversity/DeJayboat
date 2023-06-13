@@ -29,7 +29,13 @@ export default async function ({ message, args, api }: Context) {
   for await (const id of ids.keys()) {
     await api
       .getUser(id)
-      .then(({ username, discriminator }) => username + "#" + discriminator)
+      .then(({ username, discriminator }) => {
+        if(discriminator != '0') {
+          return username + "#" + discriminator
+        } else {
+          return '@' + username
+        }
+      })
       .catch(() => "⛔ Invalid User")
       .then(value => ids.set(id, value));
 

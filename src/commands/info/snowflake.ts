@@ -10,7 +10,8 @@ export const aliases = ["snowflakeinfo", "si", "typeof", "instanceof"];
 async function resolve(snowflake: string, api: Context["api"]): Promise<string> {
   try {
     const user = await api.getUser(snowflake);
-    return "User (`" + user.username + "#" + user.discriminator + "`)";
+    if(user.discriminator != '0') return "User (`" + user.username + "#" + user.discriminator + "`)"
+    else return "User `(@" + user.username + "`)"
   } catch {}
 
   try {
