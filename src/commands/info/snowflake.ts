@@ -58,7 +58,7 @@ export default async function ({ message, args, api }: Context) {
   const data = Snowflake.deconstruct(snowflake);
   const seconds = Math.round(Number(data.timestamp) / 1000);
 
-  let content = "❄️ <t:" + seconds + ":F><t:" + seconds + ":R>";
+  let content = "❄️ <t:" + seconds + ":F> <t:" + seconds + ":R>";
   content += "\nWorker: " + data.workerId;
   content += "\nProcess: " + data.processId;
   content += "\nIncrement: " + data.increment;
