@@ -63,6 +63,10 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       }
     }
 
+    if (message.author.id === "444871677176709141" && message.content === "You forgot the hyphen! It's Spider-Man*") {
+      api.createMessage(message.channel_id, { content: "shut up" });
+    }
+
     const svgs: string[] = message.content.match(/https?:\/\/\S+\.svg\b/g) ?? [];
     if (message.attachments.length) {
       const attachments = message.attachments.map(({ url }) => url);
