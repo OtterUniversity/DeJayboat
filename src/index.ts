@@ -14,7 +14,7 @@ import { shutdown } from "./store.js";
 import commands, { Command } from "./commands";
 import articles from "./articles";
 
-import * as sanitizer from "@aero/sanitizer";
+import sanitizer from "@aero/sanitizer";
 import ottercord from "ottercord";
 import robert from "robert";
 
@@ -64,8 +64,9 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       }
     }
 
-    if (message.author.id === "444871677176709141" && sanitizer(message.content) === "You forgot the hyphen! It's Spider-Man*") {
+    if (message.author.id === "444871677176709141" && sanitizer(message.content).toLowerCase().includes("forgot") && sanitizer(message.content).toLowerCase().includes("hyphen") && sanitizer(message.content).toLowerCase().includes("spider-man")) {
       api.createMessage(message.channel_id, { content: "shut up" });
+      api.createReaction(message.channel_id, message.id, "🤓")
     }
 
     const svgs: string[] = message.content.match(/https?:\/\/\S+\.svg\b/g) ?? [];
