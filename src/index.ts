@@ -14,6 +14,7 @@ import { shutdown } from "./store.js";
 import commands, { Command } from "./commands";
 import articles from "./articles";
 
+import * as sanitizer from "@aero/sanitizer";
 import ottercord from "ottercord";
 import robert from "robert";
 
@@ -63,7 +64,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       }
     }
 
-    if (message.author.id === "444871677176709141" && message.content.replaceAll("\u200b", "") === "You forgot the hyphen! It's Spider-Man*") {
+    if (message.author.id === "444871677176709141" && sanitizer(message.content) === "You forgot the hyphen! It's Spider-Man*") {
       api.createMessage(message.channel_id, { content: "shut up" });
     }
 
