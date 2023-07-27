@@ -66,7 +66,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
 
     if (message.author.id === "444871677176709141" && sanitizer(message.content).toLowerCase().includes("forgot") && sanitizer(message.content).toLowerCase().includes("hyphen") && sanitizer(message.content).toLowerCase().includes("spider-man")) {
       api.createMessage(message.channel_id, { content: "shut up" });
-      api.createReaction(message.channel_id, message.id, "🤓")
+      api.createReaction(message.channel_id, message.id, encodeURIComponent("🤓"))
     }
 
     const svgs: string[] = message.content.match(/https?:\/\/\S+\.svg\b/g) ?? [];
