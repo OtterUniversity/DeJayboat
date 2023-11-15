@@ -21,11 +21,22 @@ export default async function ({ message, args, api }: Context) {
     return;
   } catch {}
 
-  await api.createGuildBan(message.guild_id, userId, {
-    deleteMessageDays: 0,
-    reason: ".cache by " + message.author.username + "#" + message.author.discriminator
-  });
+  try {
+    await api.getGuildBan(message.guild_id, userId);
+    // if they're already banned, ban and unban
+    await api.removeGuildBan(message.guild_id, userId);
+    await api.createGuildBan(message.guild_id, userId, {
+      deleteMessageDays: 0,
+      reason: ".cache by " + message.author.username + "#" + message.author.discriminator
+    });
+  } catch {
+    // if they arent banned, ban and unban
+    await api.createGuildBan(message.guild_id, userId, {
+      deleteMessageDays: 0,
+      reason: ".cache by " + message.author.username + "#" + message.author.discriminator
+    });
+    await api.removeGuildBan(message.guild_id, userId);
+  }
 
-  await api.removeGuildBan(message.guild_id, userId);
   await api.createMessage(message.channel_id, { content: `<@${userId}> has been cached` });
 }
