@@ -22,7 +22,8 @@ export default async function ({ message, args, api }: Context) {
     .getGuildMember(message.guild_id, userId)
     .then(() => true)
     .catch(() => false);
-  if (!isInServer) {
+
+  if (isInServer) {
     await api.createMessage(message.channel_id, { content: "User is in the server" });
     return;
   }
