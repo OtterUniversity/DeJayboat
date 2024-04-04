@@ -56,6 +56,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       }
     }
 
+    // #region Channel 5
     if (message.channel_id === "1094133074243108954") {
       // TODO: Move to config :)
       const content = message.content?.toLowerCase();
@@ -63,54 +64,20 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
         api.deleteMessage(message.channel_id, message.id);
       }
     }
+    // #endregion
 
+    // #region Fire Spider-Man Reminder
     if (message.author.id === "444871677176709141" && sanitizer(message.content).toLowerCase().includes("forgot") && sanitizer(message.content).toLowerCase().includes("hyphen") && sanitizer(message.content).toLowerCase().includes("spider-man")) {
       api.createMessage(message.channel_id, { content: "shut up" });
       api.createReaction(message.channel_id, message.id, encodeURIComponent("🤓"))
     }
+    // #endregion
 
+    // #region SVG Converter
     const svgs: string[] = message.content.match(/https?:\/\/\S+\.svg\b/g) ?? [];
     if (message.attachments.length) {
       const attachments = message.attachments.map(({ url }) => url);
       svgs.push(...attachments);
-    }
-
-    if (message.content.includes("https://spotify.link/")) {
-      const [short] = message.content.match(/https:\/\/spotify\.link\/.{11}/g) ?? [];
-      let spotify: string;
-      await robert
-        .head(short)
-        .full()
-        .send()
-        .then(res => (spotify = res.headers.location))
-        .catch(() => {});
-      await api.createMessage(message.channel_id, {
-        content: spotify
-      });
-    }
-
-    if (message.embeds.length) {
-      const tiktoks = message.embeds.filter(
-        embed => embed.provider && embed.provider.name === "TikTok" && embed.url && embed.url.includes("tiktok.com")
-      );
-
-      if (tiktoks.length) {
-        await api.editMessage(message.channel_id, message.id, { flags: MessageFlags.SuppressEmbeds });
-        await api.createMessage(message.channel_id, {
-          content: tiktoks.map(({ url }) => url.replace("tiktok.com", "tiktxk.com")).join("\n")
-        });
-      }
-
-      const tweets = message.embeds.filter(
-        embed => embed.url && embed.url.startsWith("https://twitter.com") && embed.video
-      );
-
-      if (tweets.length) {
-        await api.editMessage(message.channel_id, message.id, { flags: MessageFlags.SuppressEmbeds });
-        await api.createMessage(message.channel_id, {
-          content: tweets.map(({ url }) => url.replace("twitter.com", "fxtwitter.com")).join("\n")
-        });
-      }
     }
 
     if (svgs) {
@@ -140,6 +107,32 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       if (files.length) api.createMessage(message.channel_id, {}, files);
     }
 
+    // #endregion
+
+    // #region Embed Fixers
+    const replacements = {
+      "twitter.com": "vxtwitter.com",
+      "x.com": "fixvx.com",
+      "tiktok.com": "tiktxk.com"
+    }
+
+    const urls = message.content.match(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)/gm) ?? [];
+
+    try {
+      for (let url of urls) {  
+        const nURL = new URL(url);
+        if (nURL.hostname in replacements) {
+          // this will send multiple messages if the user sends multiple links. their fault.
+          await api.editMessage(message.channel_id, message.id, { flags: MessageFlags.SuppressEmbeds });
+          await api.createMessage(message.channel_id, {
+            content: url.replace(nURL.hostname, replacements[nURL.hostname])
+          });
+        }
+      }
+    } catch(error) {} // dont caare whatever went wrong is fine
+    // #endregion
+
+    // #region Command Parsing
     if (!message.content.startsWith(config.prefix)) return;
 
     let next = message.content.slice(config.prefix.length).trim();
@@ -177,28 +170,15 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
         content: "<@296776625432035328> it broke\n```js\n" + e.message + "\n" + e.stack + "```"
       });
     }
+    // #endregion
   }
 
   if (t === GatewayDispatchEvents.MessageUpdate && d.guild_id) {
     const updated_message: GatewayMessageUpdateDispatchData = d;
     if (updated_message.channel_id === "1094133074243108954") {
-      // TODO: Move to config :)
       const content = updated_message.content?.toLowerCase();
       if (content !== "5") {
         api.deleteMessage(updated_message.channel_id, updated_message.id);
-      }
-    }
-
-    if (updated_message.embeds.length) {
-      const tweets = updated_message.embeds.filter(
-        embed => embed.url && embed.url.startsWith("https://twitter.com") && embed.video
-      );
-
-      if (tweets.length) {
-        await api.editMessage(updated_message.channel_id, updated_message.id, { flags: MessageFlags.SuppressEmbeds });
-        await api.createMessage(updated_message.channel_id, {
-          content: tweets.map(({ url }) => url.replace("twitter.com", "fxtwitter.com")).join("\n")
-        });
       }
     }
   }
