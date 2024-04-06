@@ -109,29 +109,6 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
 
     // #endregion
 
-    // #region Embed Fixers
-    const replacements = {
-      "twitter.com": "vxtwitter.com",
-      "x.com": "fixvx.com",
-      "tiktok.com": "tiktxk.com"
-    }
-
-    const urls = message.content.match(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)/gm) ?? [];
-
-    try {
-      for (let url of urls) {  
-        const nURL = new URL(url);
-        if (nURL.hostname in replacements) {
-          // this will send multiple messages if the user sends multiple links. their fault.
-          await api.editMessage(message.channel_id, message.id, { flags: MessageFlags.SuppressEmbeds });
-          await api.createMessage(message.channel_id, {
-            content: url.replace(nURL.hostname, replacements[nURL.hostname])
-          });
-        }
-      }
-    } catch(error) {} // dont caare whatever went wrong is fine
-    // #endregion
-
     // #region Command Parsing
     if (!message.content.startsWith(config.prefix)) return;
 
