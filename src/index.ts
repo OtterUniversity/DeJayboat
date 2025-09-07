@@ -93,10 +93,13 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
         api.createMessage(message.channel_id, {
           content: `<:wires:1208617503232892938> repost detected${"!".repeat(
             Math.floor(Math.random() * 5 + 1)
-          )} this was posted <t:${ogMessage.timestamp.slice(0, -3)}:R> by <@${ogMessage.author.id}>: ${ogMessageUrl}
-          
-          ${repostGifs[Math.floor(Math.random() * repostGifs.length)]}`,
-          allowedMentions: { parse: [] }
+          )} this was posted <t:${Math.floor(new Date(ogMessage.timestamp).getTime() / 1000)}:R> by <@${
+            ogMessage.author.id
+          }>: ${ogMessageUrl}
+
+${repostGifs[Math.floor(Math.random() * repostGifs.length)]}`,
+          allowedMentions: { parse: [] },
+          messageReference: { message_id: message.id }
         });
       } else {
         recentTweets.set(tweetId, message);
