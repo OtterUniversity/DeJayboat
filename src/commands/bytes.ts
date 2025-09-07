@@ -1,6 +1,5 @@
 import prettyBytes from "pretty-bytes";
 import { Context } from "../util";
-import robert from "robert";
 
 export const open = true;
 export const name = "bytes";

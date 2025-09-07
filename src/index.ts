@@ -83,54 +83,6 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     }
     // #endregion
 
-    // #region Fire Spider-Man Reminder
-    if (
-      message.author.id === "444871677176709141" &&
-      sanitizer(message.content).toLowerCase().includes("forgot") &&
-      sanitizer(message.content).toLowerCase().includes("hyphen") &&
-      sanitizer(message.content).toLowerCase().includes("spider-man")
-    ) {
-      api.createMessage(message.channel_id, { content: "shut up" });
-      api.createReaction(message.channel_id, message.id, encodeURIComponent("🤓"));
-    }
-    // #endregion
-
-    // #region SVG Converter
-    const svgs: string[] = message.content.match(/https?:\/\/\S+\.svg\b/g) ?? [];
-    if (message.attachments.length) {
-      const attachments = message.attachments.map(({ url }) => url);
-      svgs.push(...attachments);
-    }
-
-    if (svgs) {
-      const files = [];
-      for await (const svg of svgs.slice(0, 10)) {
-        let validSvg: boolean;
-        try {
-          new URL(svg);
-          validSvg = true;
-        } catch {}
-
-        if (validSvg)
-          await robert
-            .get("https://util.bruhmomentlol.repl.co/svg")
-            .query("q", svg)
-            .query("width", 400)
-            .send("buffer")
-            .then(value =>
-              files.push({
-                name: "image" + files.length + ".png",
-                value
-              })
-            )
-            .catch(() => {});
-      }
-
-      if (files.length) api.createMessage(message.channel_id, {}, files);
-    }
-
-    // #endregion
-
     // #region Repost Detector
     let match: RegExpExecArray | null;
     while ((match = tweetRegex.exec(message.content)) !== null) {
