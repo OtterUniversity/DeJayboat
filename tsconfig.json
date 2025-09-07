@@ -9,5 +9,5 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "config.ts"]
+  "include": ["src/**/*.ts", "src/pretty-bytes", "config.ts"]
 }
