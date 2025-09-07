@@ -99,7 +99,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
 
 ${repostGifs[Math.floor(Math.random() * repostGifs.length)]}`,
           allowedMentions: { parse: [] },
-          messageReference: { message_id: message.id }
+          messageReference: { message_id: message.id, replied_user: true }
         });
       } else {
         recentTweets.set(tweetId, message);
