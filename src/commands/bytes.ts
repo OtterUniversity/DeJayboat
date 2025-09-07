@@ -1,0 +1,14 @@
+import prettyBytes from "pretty-bytes";
+import { Context } from "../util";
+import robert from "robert";
+
+export const open = true;
+export const name = "bytes";
+export default async function ({ message, args, api }: Context) {
+  let bytes = parseInt(args[0]);
+  if (!bytes) return await api.createMessage(message.channel_id, { content: "invalid amount of bytes" });
+
+  await api.createMessage(message.channel_id, {
+    content: prettyBytes(bytes) + "\n" + prettyBytes(bytes, { bits: true })
+  });
+}
