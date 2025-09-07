@@ -1,4 +1,4 @@
-import prettyBytes from "../pretty-bytes";
+import prettyBytes from "../pretty-bytes/index.js";
 import { Context } from "../util";
 
 export const open = true;
