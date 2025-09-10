@@ -89,7 +89,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       const tweetId = match[1];
       if (recentTweets.has(tweetId)) {
         const ogMessage = recentTweets.get(tweetId)!;
-        const ogMessageUrl = `https://discord.com/channels/${message.guild_id}/${message.channel_id}/${message.id}`;
+        const ogMessageUrl = `https://discord.com/channels/${ogMessage.guild_id}/${ogMessage.channel_id}/${ogMessage.id}`;
         api.createMessage(message.channel_id, {
           content: `<:wires:1208617503232892938> repost detected${"!".repeat(
             Math.floor(Math.random() * 5 + 1)
