@@ -83,6 +83,22 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     }
     // #endregion
 
+    // #region Fire Spider-Man Reminder
+    if (
+      message.author.id === "444871677176709141" &&
+      sanitizer(message.content).toLowerCase().includes("forgot") &&
+      sanitizer(message.content).toLowerCase().includes("hyphen") &&
+      sanitizer(message.content).toLowerCase().includes("spider-man")
+    ) {
+      const myResponse = await api.createMessage(message.channel_id, { content: "shut up" });
+      api.createReaction(message.channel_id, message.id, encodeURIComponent("🤓"));
+      setTimeout(() => {
+        api.deleteMessage(message.channel_id, message.id);
+        api.deleteMessage(message.channel_id, myResponse.id);
+      }, 5000);
+    }
+    // #endregion
+
     // #region Repost Detector
     let match: RegExpExecArray | null;
     while ((match = tweetRegex.exec(message.content)) !== null) {
