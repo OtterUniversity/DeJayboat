@@ -23,20 +23,6 @@ const api = ottercord(config.token);
 
 const tweetRegex = /(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/[^\/]+\/status\/(\d+)/g;
 const recentTweets = new Map<string, GatewayMessageCreateDispatchData>();
-const repostGifs = [
-  "https://tenor.com/view/killablades-cat-gif-20293604",
-  "https://tenor.com/view/live-tucker-reaction-live-tucker-reaction-gif-21635164",
-  "https://tenor.com/view/mean-cat-cat-fu-gif-23644413",
-  "https://tenor.com/view/sus-cat-cat-stare-stare-bruh-cat-really-n-gif-25597234",
-  "https://tenor.com/view/cat-cat-meme-cat-staring-cat-stare-stop-staring-at-me-please-gif-9315292369693569596",
-  "https://media.discordapp.net/attachments/985005849552494612/996208706389823619/gat.gif",
-  "https://media.discordapp.net/attachments/570617862327238656/1122143799632728124/1CFC6F34-BB31-40F6-AA72-DE250F097A90-1.gif",
-  "https://tenor.com/view/cat-i-am-going-insane-insane-gif-25031823",
-  "https://tenor.com/view/what-happened-what-happened-to-you-as-a-child-what-kind-of-trauma-makes-you-act-like-this-stare-stare-cat-gif-2454779732634892782",
-  "https://tenor.com/view/cat-walking-cat-come-cute-cat-walking-gif-8692571989328773745",
-  "https://tenor.com/view/nuh-uh-beocord-no-lol-gif-24435520",
-  "https://tenor.com/view/cat-cats-furious-cute-kitty-gif-3789237232849071146"
-];
 
 ws.on("ready", () => {
   if (shutdown.time && shutdown.channel && shutdown.message && Date.now() - shutdown.time < 60000)
@@ -111,9 +97,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
             Math.floor(Math.random() * 5 + 1)
           )} this was posted <t:${Math.floor(new Date(ogMessage.timestamp).getTime() / 1000)}:R> by <@${
             ogMessage.author.id
-          }>: ${ogMessageUrl}
-
-${repostGifs[Math.floor(Math.random() * repostGifs.length)]}`,
+          }>: ${ogMessageUrl}`,
           allowedMentions: { parse: [] },
           messageReference: { message_id: message.id, replied_user: true }
         });
