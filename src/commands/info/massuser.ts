@@ -26,15 +26,13 @@ export default async function ({ message, args, api }: Context) {
     content: "🔍 Loading..."
   });
 
+  let arr = [];
   for await (const id of ids.keys()) {
     await api
       .getUser(id)
-      .then(({ username, discriminator }) => {
-        if(discriminator != '0') {
-          return username + "#" + discriminator
-        } else {
-          return '@' + username
-        }
+      .then(u => {
+        arr.push(u);
+        return u.username;
       })
       .catch(() => "⛔ Invalid User")
       .then(value => ids.set(id, value));
@@ -48,9 +46,14 @@ export default async function ({ message, args, api }: Context) {
 
     const percent = Math.round((completed / ids.size) * 10);
     if (!performance || completed === ids.size) {
-      let file;
+      let files = [];
+      if (completed === ids.size) {
+        files.push({ name: "users.json", value: JSON.stringify(arr, null, 2) });
+        if (description.length > 4000) {
+          files.push({ name: "users.txt", value: description });
+        }
+      }
       if (description.length > 4000) {
-        if (completed === ids.size) file = { name: "users.txt", value: description };
         description = description.slice(0, 4000);
       }
 
@@ -58,15 +61,7 @@ export default async function ({ message, args, api }: Context) {
         pending.channel_id,
         pending.id,
         {
-          content:
-            "(`" +
-            completed +
-            "/" +
-            ids.size +
-            "`) [" +
-            "⬜".repeat(percent) +
-            "🔳".repeat(10 - percent) +
-            "] ",
+          content: "(`" + completed + "/" + ids.size + "`) [" + "⬜".repeat(percent) + "🔳".repeat(10 - percent) + "] ",
           embeds: [
             {
               color,
@@ -78,7 +73,7 @@ export default async function ({ message, args, api }: Context) {
             }
           ]
         },
-        file
+        files
       );
     }
   }
