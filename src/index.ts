@@ -109,8 +109,12 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     // #endregion
 
     // #region I'm nick
-    if (message.content.toLowerCase().startsWith("im") || message.content.toLowerCase().startsWith("i'm")) {
-      const nick = message.content.toLowerCase().replace(/^i'?m/, "").trim();
+    if (
+      message.content.toLowerCase().startsWith("im ") ||
+      message.content.toLowerCase().startsWith("i'm ") ||
+      message.content.toLowerCase().startsWith("i‘m ")
+    ) {
+      const nick = message.content.replace(/^i'?m/i, "").trim();
       api.modifyGuildMember(message.guild_id, message.author.id, { nick });
     }
     // #endregion
