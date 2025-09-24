@@ -108,18 +108,6 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     }
     // #endregion
 
-    // #region I'm nick
-    if (
-      message.content.toLowerCase().startsWith("im ") ||
-      message.content.toLowerCase().startsWith("i'm ") ||
-      message.content.toLowerCase().startsWith("i‘m ") ||
-      message.content.toLowerCase().startsWith("i’m")
-    ) {
-      const nick = message.content.replace(/^i.?m/i, "").trim();
-      api.modifyGuildMember(message.guild_id, message.author.id, { nick });
-    }
-    // #endregion
-
     // #region Command Parsing
     if (!message.content.startsWith(config.prefix)) return;
 
