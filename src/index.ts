@@ -89,13 +89,14 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     let match: RegExpExecArray | null;
     while ((match = tweetRegex.exec(message.content)) !== null) {
       const tweetId = match[1];
-      if (recentTweets.has(tweetId)) {
-        const sourceMessages = recentTweets.get(tweetId)!;
+      const sourceMessages = recentTweets.get(tweetId);
+
+      if (sourceMessages && sourceMessages.size > 0) {
         const allSources = [...sourceMessages]
           .map(ogMessage => {
             const ts = Math.floor(new Date(ogMessage.timestamp).getTime() / 1000);
             const ogMessageUrl = `https://discord.com/channels/${ogMessage.guild_id}/${ogMessage.channel_id}/${ogMessage.id}`;
-            return `<t:${ts}:R> by <@${ogMessage.author.id}>: ${ogMessageUrl}}`;
+            return `<t:${ts}:R> by <@${ogMessage.author.id}>: ${ogMessageUrl}`;
           })
           .join(" and ");
 
@@ -106,17 +107,19 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
           allowedMentions: { parse: [] },
           messageReference: { message_id: message.id, replied_user: true }
         });
+
+        // add the current message to the set so future reposts include it as a source
+        sourceMessages.add(message);
       } else {
-        recentTweets.set(
-          tweetId,
-          recentTweets.has(tweetId) ? recentTweets.get(tweetId).add(message) : new Set([message])
-        );
-        setTimeout(() => {
-          const sourceMessages = recentTweets.get(tweetId);
-          sourceMessages.delete(message);
-          if (sourceMessages.size === 0) recentTweets.delete(tweetId);
-        }, 24 * 60 * 60 * 1000);
+        recentTweets.set(tweetId, new Set([message]));
       }
+
+      setTimeout(() => {
+        const msgs = recentTweets.get(tweetId);
+        if (!msgs) return;
+        msgs.delete(message);
+        if (msgs.size === 0) recentTweets.delete(tweetId);
+      }, 24 * 60 * 60 * 1000);
     }
     // #endregion
 
