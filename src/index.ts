@@ -22,7 +22,7 @@ const ws = new Gateway.Socket(config.token);
 const api = ottercord(config.token);
 
 const tweetRegex = /(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/[^\/]+\/status\/(\d+)/g;
-const recentTweets = new Map<string, GatewayMessageCreateDispatchData>();
+const recentTweets = new Map<string, Set<GatewayMessageCreateDispatchData>>();
 
 ws.on("ready", () => {
   if (shutdown.time && shutdown.channel && shutdown.message && Date.now() - shutdown.time < 60000)
@@ -90,20 +90,32 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     while ((match = tweetRegex.exec(message.content)) !== null) {
       const tweetId = match[1];
       if (recentTweets.has(tweetId)) {
-        const ogMessage = recentTweets.get(tweetId)!;
-        const ogMessageUrl = `https://discord.com/channels/${ogMessage.guild_id}/${ogMessage.channel_id}/${ogMessage.id}`;
+        const sourceMessages = recentTweets.get(tweetId)!;
+        const allSources = [...sourceMessages]
+          .map(ogMessage => {
+            const ts = Math.floor(new Date(ogMessage.timestamp).getTime() / 1000);
+            const ogMessageUrl = `https://discord.com/channels/${ogMessage.guild_id}/${ogMessage.channel_id}/${ogMessage.id}`;
+            return `<t:${ts}:R> by <@${ogMessage.author.id}>: ${ogMessageUrl}}`;
+          })
+          .join(" and ");
+
         api.createMessage(message.channel_id, {
           content: `<:wires:1208617503232892938> repost detected${"!".repeat(
             Math.floor(Math.random() * 5 + 1)
-          )} this was posted <t:${Math.floor(new Date(ogMessage.timestamp).getTime() / 1000)}:R> by <@${
-            ogMessage.author.id
-          }>: ${ogMessageUrl}`,
+          )} this was posted ${allSources}`,
           allowedMentions: { parse: [] },
           messageReference: { message_id: message.id, replied_user: true }
         });
       } else {
-        recentTweets.set(tweetId, message);
-        setTimeout(() => recentTweets.delete(tweetId), 24 * 60 * 60 * 1000);
+        recentTweets.set(
+          tweetId,
+          recentTweets.has(tweetId) ? recentTweets.get(tweetId).add(message) : new Set([message])
+        );
+        setTimeout(() => {
+          const sourceMessages = recentTweets.get(tweetId);
+          sourceMessages.delete(message);
+          if (sourceMessages.size === 0) recentTweets.delete(tweetId);
+        }, 24 * 60 * 60 * 1000);
       }
     }
     // #endregion
