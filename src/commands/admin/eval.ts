@@ -29,7 +29,7 @@ export default async function ({ message, args, api, ws }: Context) {
       }
     }
 
-    let res: string = typeof out === "string" ? out : inspect(out, { depth: 1 });
+    let res: string = out === true ? "<:true:1275998794562928773>" : typeof out === "string" ? out : inspect(out, { depth: 1 });
     if (res.length > max - prefix.length - suffix.length - slice.length)
       res = res.slice(0, max - prefix.length - suffix.length - slice.length) + "...";
 
