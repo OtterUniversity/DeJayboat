@@ -59,6 +59,10 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       }
     }
 
+    if (message.author.id === "194861788926443520" && /h(i|ello) (every(body|one))? it'?s me (dj|dejay)/i.test(message.content)) {
+      api.createMessage(message.channel_id, { content: "hi nora" });
+    }
+
     // #region Channel 5
     if (message.channel_id === "1094133074243108954") {
       // TODO: Move to config :)
