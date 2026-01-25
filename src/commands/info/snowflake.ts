@@ -46,6 +46,13 @@ async function resolve(snowflake: string, api: Context["api"]): Promise<string> 
     if (status === 403) return "Webhook";
   }
 
+  try {
+    const status = await robert
+      .head("https://cdn.discordapp.com/emojis/" + snowflake + ".png")
+      .send("status");
+    if (status === 200) return "Emoji";
+  } catch {}
+
   return "Unknown";
 }
 
