@@ -122,6 +122,10 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       }, 24 * 60 * 60 * 1000);
     }
     // #endregion
+    
+    if (message.author.id === "194861788926443520" && /h(i|ello) (every(body|one))? it'?s me (dj|dejay)/i.test(message.content)) {
+      api.createMessage(message.channel_id, { content: "hi nora" });
+    }
 
     // #region Command Parsing
     if (!message.content.startsWith(config.prefix)) return;
