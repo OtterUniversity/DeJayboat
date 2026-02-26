@@ -133,11 +133,11 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       api.createMessage(message.channel_id, { content: "hi nora" });
     }
 
-    if (message.author.id === "1418542549207093410") {
-      const messageUrl = `https://discord.com/channels/${message.guild_id}/${message.channel_id}/${message.id}`;
-      await api.createMessage(message.channel_id, { content: messageUrl });
-      setTimeout(() => api.deleteMessage(message.channel_id, message.id), 1000);
-    }
+    // if (message.author.id === "1418542549207093410") {
+    //   const messageUrl = `https://discord.com/channels/${message.guild_id}/${message.channel_id}/${message.id}`;
+    //   await api.createMessage(message.channel_id, { content: messageUrl });
+    //   setTimeout(() => api.deleteMessage(message.channel_id, message.id), 1000);
+    // }
 
     // #region Command Parsing
     if (!message.content.startsWith(config.prefix)) return;
