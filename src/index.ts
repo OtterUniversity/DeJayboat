@@ -128,9 +128,16 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
 
     if (
       message.author.id === "194861788926443520" &&
-      /h(i|ello) (every(body|one))? it'?s me (dj|dejay)/i.test(message.content)
+      /h(i|ello|ey) (every(body|one))? it'?s me (dj|dejay)/i.test(message.content)
     ) {
       api.createMessage(message.channel_id, { content: "hi nora" });
+    }
+
+    if (
+      message.author.id === "1418542549207093410" &&
+      /h(i|ello|ey) (every(body|one))? it'?s me (polar|haris)/i.test(message.content)
+    ) {
+      api.createMessage(message.channel_id, { content: Math.random() > 0.5 ? "hi dejay" : "hi dj" });
     }
 
     // if (message.author.id === "1418542549207093410") {
