@@ -32,8 +32,9 @@ export default async function ({ message, api, ws, args }: Context) {
 
   let deleted = 0;
   let before;
+  let loopCount;
 
-  while (deleted < limit) {
+  while (deleted < limit && loopCount < 10) {
     const nextMessages = await api
       .getChannelMessages(message.channel_id, {
         before,
@@ -41,7 +42,7 @@ export default async function ({ message, api, ws, args }: Context) {
         limit: `${limit - deleted}`
       })
       .then((ms) => ms.filter((m) => m.author_id === message.author.id));
-      
+
     if (nextMessages.length === 0) break;
 
     deleted += nextMessages.length;
@@ -50,9 +51,12 @@ export default async function ({ message, api, ws, args }: Context) {
     await api.bulkDeleteMessages(message.channel_id, {
       messages: nextMessages.map((m) => m.id)
     });
+    
     await api.editMessage(statusMsg.channel_id, statusMsg.id, {
       content: `deleted ${deleted}/${limit} messages`
     });
+
+    loopCount++;
   }
 
   await api.editMessage(statusMsg.channel_id, statusMsg.id, {
