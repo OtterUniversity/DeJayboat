@@ -1,5 +1,4 @@
 import { Context, exactSnowflakeRegex } from "../util";
-import { UserFlags } from "./info/flags";
 
 export const open = true;
 export const name = "personalpurge";
@@ -30,9 +29,9 @@ export default async function ({ message, api, ws, args }: Context) {
     content: `deleting messages after \`${after ?? "none"}\` with a limit of \`${limit}\``
   });
 
+  let loopCount = 0;
   let deleted = 0;
   let before;
-  let loopCount;
 
   while (deleted < limit && loopCount < 10) {
     const nextMessages = await api
@@ -46,12 +45,12 @@ export default async function ({ message, api, ws, args }: Context) {
     if (nextMessages.length === 0) break;
 
     deleted += nextMessages.length;
-    before = nextMessages[0].length;
+    before = nextMessages[nextMessages.length - 1].id;
 
     await api.bulkDeleteMessages(message.channel_id, {
       messages: nextMessages.map((m) => m.id)
     });
-    
+
     await api.editMessage(statusMsg.channel_id, statusMsg.id, {
       content: `deleted ${deleted}/${limit} messages`
     });
