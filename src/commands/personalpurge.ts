@@ -20,7 +20,7 @@ export default async function ({ message, api, ws, args }: Context) {
 
       if (limit > 100)
         return api.createMessage(message.channel_id, {
-          content: "cant download over 100 of your messages"
+          content: "cant delete over 100 of your messages"
         });
     }
   }
@@ -40,7 +40,7 @@ export default async function ({ message, api, ws, args }: Context) {
         after,
         limit: `${limit - deleted}`
       })
-      .then((ms) => ms.filter((m) => m.author_id === message.author.id));
+      .then((ms) => ms.filter((m) => m.author.id === message.author.id));
 
     if (nextMessages.length === 0) break;
 
