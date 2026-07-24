@@ -11,7 +11,7 @@ export default async function ({ message, api }: Context) {
     if (
       !command.open &&
       !owners.includes(message.author.id) &&
-      !message.member.roles.includes(role)
+      !message.member?.roles.includes(role)
     )
       continue;
 

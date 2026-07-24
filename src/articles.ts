@@ -4,29 +4,52 @@ import { color, Client } from "./util";
 import { load } from "cheerio";
 import robert from "robert";
 
+interface ZendeskCategory {
+  id: number;
+  name: string;
+  html_url: string;
+}
+
+interface ZendeskSection {
+  id: number;
+  category_id: number;
+  name: string;
+  html_url: string;
+}
+
+interface ZendeskArticle {
+  id: number;
+  html_url: string;
+  title: string;
+  created_at: string;
+  section_id: number;
+  body: string;
+  label_names: string[];
+}
+
 const zendesk = robert
   .client("https://support.discord.com/api/v2/help_center/en-us")
   .format("json");
 
 export default async function (api: Client["api"]) {
-  const categories = await zendesk
+  const categories: Record<string, ZendeskCategory> = await zendesk
     .get("/categories.json")
     .send()
-    .then(res => Object.fromEntries(res.categories.map(c => [c.id, c])));
+    .then(res => Object.fromEntries(res.categories.map((c: ZendeskCategory) => [c.id, c])));
 
-  const sections = await zendesk
+  const sections: Record<string, ZendeskSection> = await zendesk
     .get("/sections.json")
     .send()
-    .then(res => Object.fromEntries(res.sections.map(s => [s.id, s])));
+    .then(res => Object.fromEntries(res.sections.map((s: ZendeskSection) => [s.id, s])));
 
   if (!known.length) {
     console.log("Setting up articles...");
-    const { articles } = await zendesk
+    const { articles } = (await zendesk
       .get("/articles.json")
       .query("sort_by", "created_at")
       .query("sort_order", "desc")
       .query("per_page", 99)
-      .send();
+      .send()) as { articles: ZendeskArticle[] };
 
     known.push(...articles.map(({ id }) => id));
     updateArticles();
@@ -34,12 +57,12 @@ export default async function (api: Client["api"]) {
 
   setInterval(async () => {
     console.log("Fetching articles");
-    const { articles } = await zendesk
+    const { articles } = (await zendesk
       .get("/articles.json")
       .query("sort_by", "created_at")
       .query("sort_order", "desc")
       .query("per_page", 99)
-      .send();
+      .send()) as { articles: ZendeskArticle[] };
 
     const after = articles.filter(({ id }) => !known.includes(id));
     if (after.length) {
@@ -62,7 +85,7 @@ export default async function (api: Client["api"]) {
               .slice(0, 200) + "...";
 
           const tags = article.label_names
-            .map(tag =>
+            .map((tag: string) =>
               tag
                 .split(/[^\w]/gim)
                 .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -76,7 +99,7 @@ export default async function (api: Client["api"]) {
             title: article.title,
             url: article.html_url,
             timestamp: article.created_at,
-            image: { url: image },
+            image: image ? { url: image } : undefined,
             footer: {
               text: tags
             },

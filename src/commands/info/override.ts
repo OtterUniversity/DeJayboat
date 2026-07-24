@@ -30,6 +30,8 @@ export default function ({ message, args, api }: Context) {
   }
 
   const param = url.searchParams.get("s");
+  if (!param) return api.createMessage(message.channel_id, { content: "Invalid Parameter" });
+
   if (
     url.hostname === "discord.com" ||
     url.hostname === "discordapp.com" ||

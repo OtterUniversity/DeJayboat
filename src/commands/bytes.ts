@@ -8,6 +8,6 @@ export default async function ({ message, args, api }: Context) {
   if (!bytes) return await api.createMessage(message.channel_id, { content: "invalid amount of bytes" });
 
   await api.createMessage(message.channel_id, {
-    content: prettyBytes(bytes) + "\n" + prettyBytes(bytes, { bits: true })
+    content: prettyBytes(bytes)
   });
 }

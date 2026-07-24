@@ -1,5 +1,6 @@
 import { Context, snowflakeRegex, color } from "../../util";
 import type { RawFile } from "../../rest";
+import type { APIUser } from "discord-api-types/v10";
 import robert from "robert";
 
 export const name = "massuser";
@@ -9,7 +10,7 @@ export default async function ({ message, args, api }: Context) {
   let performance = args.includes("-f") || args.includes("--fast");
   if (!input) {
     const [attachment] = message.attachments;
-    if (!attachment?.content_type.endsWith("charset=utf-8"))
+    if (!attachment?.content_type?.endsWith("charset=utf-8"))
       return api.createMessage(message.channel_id, {
         content: "No input found"
       });
@@ -27,7 +28,7 @@ export default async function ({ message, args, api }: Context) {
     content: "🔍 Loading..."
   });
 
-  let arr = [];
+  let arr: APIUser[] = [];
   for await (const id of ids.keys()) {
     await api
       .getUser(id)

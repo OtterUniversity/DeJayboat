@@ -1,4 +1,5 @@
 import { Context, exactSnowflakeRegex } from "../../util";
+import { errorStatus } from "../../rest";
 import { DiscordSnowflake } from "@sapphire/snowflake";
 import { APIMessage } from "discord-api-types/v10";
 import robert from "robert";
@@ -21,15 +22,15 @@ async function resolve(snowflake: string, api: Context["api"]): Promise<string> 
 
   try {
     await api.getGuildChannels(snowflake);
-  } catch ({ status }) {
-    if (status === 403) return "Guild";
+  } catch (e) {
+    if (errorStatus(e) === 403) return "Guild";
   }
 
   try {
     const channel = await api.getChannel(snowflake);
     return "Channel (`" + channel.name + "`)";
-  } catch ({ status }) {
-    if (status === 403) return "Channel";
+  } catch (e) {
+    if (errorStatus(e) === 403) return "Channel";
   }
 
   try {
@@ -42,8 +43,8 @@ async function resolve(snowflake: string, api: Context["api"]): Promise<string> 
   try {
     const webhook = await api.getWebhook(snowflake);
     return "Webhook (" + webhook.name + ")";
-  } catch ({ status }) {
-    if (status === 403) return "Webhook";
+  } catch (e) {
+    if (errorStatus(e) === 403) return "Webhook";
   }
 
   try {

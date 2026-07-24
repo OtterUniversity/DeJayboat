@@ -9,7 +9,7 @@ export default async function ({ message, args, api }: Context) {
     api.createMessage(message.channel_id, { content: "```ansi\n" + res.toString().slice(0, 4000) + "```" });
   } catch (e) {
     api.createMessage(message.channel_id, {
-      content: e?.message ?? e ?? "⚠ Unknown Error"
+      content: e instanceof Error ? e.message : typeof e === "string" ? e : "⚠ Unknown Error"
     });
   }
 }

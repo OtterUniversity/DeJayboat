@@ -4,7 +4,7 @@ import { guilds, updateGuilds } from "../../store";
 export const name = "guilds set";
 export const aliases = ["guilds add"];
 export default async function ({ message, args, api }: Context) {
-  const id = args.shift();
+  const id = args.shift() ?? "";
   const name = args.join(" ");
   if (!exactSnowflakeRegex.test(id))
     return api.createMessage(message.channel_id, {

@@ -1,6 +1,6 @@
 import { Context, fetchExperiments, snowflakeRegex, color, collectExperiments } from "../../util";
 import { guilds, updateGuilds } from "../../store";
-import type { RawFile } from "../../rest";
+import { errorStatus, type RawFile } from "../../rest";
 import robert from "robert";
 
 import murmurhash from "murmurhash";
@@ -10,28 +10,28 @@ export const name = "massguild";
 export const aliases = ["guildinfo", "gi", "assguild"];
 
 async function resolve(id: string, api: Context["api"]): Promise<string> {
-  let ratelimited: string;
+  let ratelimited: string | undefined;
   try {
     const { name } = await api.getGuildPreview(id);
     guilds[id] = name;
     return name + "*";
-  } catch ({ status }) {
-    if (status === 429) ratelimited = "🕓 Preview Ratelimited";
+  } catch (e) {
+    if (errorStatus(e) === 429) ratelimited = "🕓 Preview Ratelimited";
   }
 
   try {
     await api.getGuildChannels(id);
-  } catch ({ status }) {
-    if (status === 404) return "⛔ Invalid Guild";
-    if (status === 429) ratelimited = "🕓 Channel Ratelimited";
+  } catch (e) {
+    if (errorStatus(e) === 404) return "⛔ Invalid Guild";
+    if (errorStatus(e) === 429) ratelimited = "🕓 Channel Ratelimited";
   }
 
   try {
     const { name } = await api.getGuildWidget(id);
     guilds[id] = name;
     return name + "^";
-  } catch ({ status }) {
-    if (status === 429) ratelimited = "🕓 Widget Ratelimited";
+  } catch (e) {
+    if (errorStatus(e) === 429) ratelimited = "🕓 Widget Ratelimited";
   }
 
   try {
@@ -44,8 +44,8 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
 
     guilds[id] = name;
     return name + "%";
-  } catch ({ status }) {
-    if (status === 429) ratelimited = "🕓 MEE6 Ratelimited";
+  } catch (e) {
+    if (errorStatus(e) === 429) ratelimited = "🕓 MEE6 Ratelimited";
   }
 
   return ratelimited ?? "🔒 Private";
@@ -57,7 +57,7 @@ export default async function ({ message, args, api }: Context) {
   let fast = args.includes("-f") || args.includes("--fast");
   if (!input) {
     const [attachment] = message.attachments;
-    if (!attachment?.content_type.endsWith("charset=utf-8"))
+    if (!attachment?.content_type?.endsWith("charset=utf-8"))
       return api.createMessage(message.channel_id, {
         content: "No input found"
       });

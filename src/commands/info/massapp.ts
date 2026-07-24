@@ -22,7 +22,7 @@ export default async function ({ message, args, api }: Context) {
   for await (const id of ids) {
     const proxy: APIMessage = await api.executeWebhook(
       webhook.id,
-      webhook.token,
+      webhook.token!,
       {
         username: "(real)",
         avatar_url: "https://cdn.discordapp.com/emojis/808831739614724186.png",

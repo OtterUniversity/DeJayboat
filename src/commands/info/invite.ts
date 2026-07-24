@@ -15,7 +15,9 @@ export default async function ({ message, args, api }: Context) {
       content: "Invalid invite"
     });
 
-  const code = inviteRegex.exec(url)[1];
+  const match = inviteRegex.exec(url);
+  if (!match) return api.createMessage(message.channel_id, { content: "Invalid invite" });
+  const code = match[1];
   let invite: APIInvite;
 
   try {
@@ -26,7 +28,9 @@ export default async function ({ message, args, api }: Context) {
     return api.createMessage(message.channel_id, { content: "Invalid invite" });
   }
 
-  const { guild } = invite;
+  const { guild, channel } = invite;
+  if (!guild || !channel) return api.createMessage(message.channel_id, { content: "Invalid invite" });
+
   if (!guilds[guild.id]) {
     guilds[guild.id] = guild.name;
     updateGuilds();
@@ -39,12 +43,12 @@ export default async function ({ message, args, api }: Context) {
         title: guild.name,
         description: guild.description || "No description",
         url: `https://discord.gg/${invite.code}`,
-        image: guild.banner && {
-          url: `https://cdn.discordapp.com/api/banners/${guild.id}/${guild.banner}.png`
-        },
-        thumbnail: guild.icon && {
-          url: `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`
-        },
+        image: guild.banner
+          ? { url: `https://cdn.discordapp.com/api/banners/${guild.id}/${guild.banner}.png` }
+          : undefined,
+        thumbnail: guild.icon
+          ? { url: `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` }
+          : undefined,
         fields: [
           {
             name: "ID",
@@ -52,7 +56,7 @@ export default async function ({ message, args, api }: Context) {
           },
           {
             name: "Channel",
-            value: `<#${invite.channel.id}> (\`${invite.channel.id}\`)\n> ${invite.channel.name}`
+            value: `<#${channel.id}> (\`${channel.id}\`)\n> ${channel.name}`
           },
           {
             name: "Inviter",

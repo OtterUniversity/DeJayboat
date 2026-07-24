@@ -9,6 +9,7 @@ import { shutdown } from "./store.js";
 import commands, { Command } from "./commands";
 import articles from "./articles";
 import birthdays from "./birthdays";
+import { GuildMessage } from "./util";
 
 import sanitizer from "@aero/sanitizer";
 
@@ -22,7 +23,7 @@ ws.manager.on(ws.WebSocketShardEvents.Ready, () => {
 
 ws.manager.on(ws.WebSocketShardEvents.Dispatch, async payload => {
   if (payload.t === GatewayDispatchEvents.MessageCreate && payload.d.guild_id) {
-    const message = payload.d;
+    const message = payload.d as GuildMessage;
     if (message.channel_id === config.datamining) {
       const [embed] = message.embeds;
       if (!embed?.description) return;

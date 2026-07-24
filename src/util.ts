@@ -20,8 +20,11 @@ export interface Client {
   ws: typeof Ws;
 }
 
+// Commands only ever run off a MessageCreate dispatch that already passed a `guild_id` check.
+export type GuildMessage = GatewayMessageCreateDispatchData & { guild_id: string };
+
 export interface Context extends Client {
-  message: GatewayMessageCreateDispatchData;
+  message: GuildMessage;
   args: string[];
 }
 

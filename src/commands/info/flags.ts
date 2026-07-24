@@ -229,7 +229,7 @@ export default async function ({ message, api, ws, args }: Context) {
     }
   }
 
-  const n = BigInt(user.public_flags);
+  const n = BigInt(user.public_flags ?? 0);
   const flags = Object.entries(UserFlags)
     .filter(([k, v]) => (n & v) === v)
     .map(([k, v]) => k);

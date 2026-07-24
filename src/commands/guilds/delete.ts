@@ -4,7 +4,7 @@ import { guilds, updateGuilds } from "../../store";
 export const name = "guilds delete";
 export const aliases = ["guilds remove", "guilds del", "guilds rem", "guilds rm"];
 export default async function ({ message, args, api }: Context) {
-  const id = args.shift();
+  const id = args.shift() ?? "";
   if (!exactSnowflakeRegex.test(id))
     return api.createMessage(message.channel_id, {
       content: "Invalid snowflake"

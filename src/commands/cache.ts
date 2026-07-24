@@ -27,15 +27,20 @@ export default async function ({ message, args, api }: Context) {
     return;
   }
 
-  const { isBanned, ban } = await api
+  const banResult = await api
     .getGuildBan(message.guild_id, userId)
-    .then(ban => ({ isBanned: true, ban }))
-    .catch(() => ({ isBanned: false, ban: null }));
+    .then(ban => ({ isBanned: true as const, ban }))
+    .catch(() => ({ isBanned: false as const, ban: null }));
 
-  if (isBanned) {
+  if (banResult.isBanned) {
     // if they're already banned, unban and ban
     await api.removeGuildBan(message.guild_id, userId);
-    await api.createGuildBan(message.guild_id, userId, { delete_message_seconds: 0 }, ban.reason ?? undefined);
+    await api.createGuildBan(
+      message.guild_id,
+      userId,
+      { delete_message_seconds: 0 },
+      banResult.ban.reason ?? undefined
+    );
   } else {
     // if they arent banned, ban and unban
     await api.createGuildBan(

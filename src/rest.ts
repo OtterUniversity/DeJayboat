@@ -30,6 +30,11 @@ export type { RawFile };
 
 export const rest = new REST({ version: "10" }).setToken(token);
 
+// Both @discordjs/rest errors and `robert`'s errors expose `.status`, but neither is `unknown`-safe to destructure directly.
+export function errorStatus(e: unknown): number | undefined {
+  return e && typeof e === "object" && "status" in e ? (e as { status?: number }).status : undefined;
+}
+
 export function createMessage(
   channelId: Snowflake,
   body: RESTPostAPIChannelMessageJSONBody,
@@ -145,6 +150,18 @@ export function getWebhookWithToken(webhookId: Snowflake, webhookToken: string):
   return rest.get(Routes.webhook(webhookId, webhookToken), { auth: false }) as Promise<APIWebhook>;
 }
 
+export function executeWebhook(
+  webhookId: Snowflake,
+  webhookToken: string,
+  body: RESTPostAPIWebhookWithTokenJSONBody,
+  wait: true
+): Promise<APIMessage>;
+export function executeWebhook(
+  webhookId: Snowflake,
+  webhookToken: string,
+  body: RESTPostAPIWebhookWithTokenJSONBody,
+  wait?: false
+): Promise<undefined>;
 export function executeWebhook(
   webhookId: Snowflake,
   webhookToken: string,

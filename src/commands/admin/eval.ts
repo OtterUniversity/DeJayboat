@@ -6,7 +6,7 @@ const suffix = "\n```";
 const slice = "...";
 const max = 4096;
 
-function $(path) {
+function $(path: string) {
   return require(path);
 }
 
@@ -24,7 +24,7 @@ export default async function ({ message, args, api, ws }: Context) {
         out = await out;
       } catch (e) {
         return api.createMessage(message.channel_id, {
-          content: e?.message ?? e ?? "⚠ Unknown Error"
+          content: e instanceof Error ? e.message : typeof e === "string" ? e : "⚠ Unknown Error"
         });
       }
     }
@@ -37,7 +37,7 @@ export default async function ({ message, args, api, ws }: Context) {
     api.createMessage(message.channel_id, { embeds: [{ color, description }] });
   } catch (e) {
     api.createMessage(message.channel_id, {
-      content: e?.message ?? e ?? "⚠ Unknown Error"
+      content: e instanceof Error ? e.message : typeof e === "string" ? e : "⚠ Unknown Error"
     });
   }
 }
