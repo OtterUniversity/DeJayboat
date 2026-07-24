@@ -38,11 +38,11 @@ export default async function ({ message, args, api }: Context) {
       api.createMessage(message.channel_id, { content: "✏️ Edited **" + path + "**" });
     } else {
       const name = basename(path);
-      const value = readFileSync(path);
+      const data = readFileSync(path);
       api.createMessage(
         message.channel_id,
         { content: "📄 Contents of **" + path + "**" },
-        { name, value }
+        [{ name, data }]
       );
     }
   }

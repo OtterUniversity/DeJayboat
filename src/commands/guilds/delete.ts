@@ -21,6 +21,6 @@ export default async function ({ message, args, api }: Context) {
 
   api.createMessage(message.channel_id, {
     content: "Deleted `" + id + "`",
-    allowedMentions: { parse: [] }
+    allowed_mentions: { parse: [] }
   });
 }

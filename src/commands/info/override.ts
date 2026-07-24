@@ -67,7 +67,7 @@ export default function ({ message, args, api }: Context) {
       embeds: [
         {
           color,
-          timestamp: new Date(data.expiresAt),
+          timestamp: data.expiresAt,
           footer: {
             text: "Expires"
           },
@@ -87,7 +87,7 @@ export default function ({ message, args, api }: Context) {
           ]
         }
       ]
-    }, dataStr.length < 1000 ? null : { name: 'override.json', value: JSON.stringify(data, null, 2) });
+    }, dataStr.length < 1000 ? undefined : [{ name: "override.json", data: JSON.stringify(data, null, 2) }]);
   } else if (url.hostname === "inv.wtf") {
     let decoded: string;
     try {

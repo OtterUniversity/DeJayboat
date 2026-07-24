@@ -38,7 +38,7 @@ export default async function ({ message, api, ws, args }: Context) {
       .getChannelMessages(message.channel_id, {
         before,
         after,
-        limit: `${limit - deleted}`
+        limit: limit - deleted
       })
       .then((ms) => ms.filter((m) => m.author.id === message.author.id));
 

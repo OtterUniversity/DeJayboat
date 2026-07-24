@@ -1,10 +1,9 @@
 import { Context, fetchExperiments, snowflakeRegex, color, collectExperiments } from "../../util";
 import { guilds, updateGuilds } from "../../store";
+import type { RawFile } from "../../rest";
 import robert from "robert";
 
-import fuse from "fuse.js";
 import murmurhash from "murmurhash";
-import { shitty_discord_scraper } from "../../config";
 import { load } from "cheerio";
 
 export const name = "massguild";
@@ -49,16 +48,6 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
     if (status === 429) ratelimited = "🕓 MEE6 Ratelimited";
   }
 
-  try {
-    const name = await robert
-      .get(`${shitty_discord_scraper}/guilds/${id}`)
-      .send("text")
-      .then(html => load(html)(".profile-username > p").html());
-
-    guilds[id] = name;
-    return name + "#";
-  } catch {}
-
   return ratelimited ?? "🔒 Private";
 }
 
@@ -85,8 +74,8 @@ export default async function ({ message, args, api }: Context) {
     const experiments = await fetchExperiments();
     let experiment = experiments[hashed];
     if (!experiment) {
-      // @ts-ignore again i dont want to enable esmoduleinterp
-      const engine = new fuse(Object.values(experiments), {
+      const { default: Fuse } = await import("fuse.js");
+      const engine = new Fuse(Object.values(experiments), {
         keys: ["metadata.title"]
       });
 
@@ -103,11 +92,7 @@ export default async function ({ message, args, api }: Context) {
       content: "Getting guilds in experiment **" + experiment.metadata.title + "**"
     });
 
-    const experimentGuilds = await collectExperiments(experiment, {
-      message,
-      args,
-      api
-    });
+    const experimentGuilds = await collectExperiments(experiment, { args });
 
     if (!experimentGuilds.ids.length) return api.createMessage(message.channel_id, { content: "No IDs found" });
 
@@ -177,9 +162,9 @@ export default async function ({ message, args, api }: Context) {
 
   let { body, progress } = render();
 
-  let file;
+  let file: RawFile[] | undefined;
   if (body.length > 4000) {
-    file = { name: "guilds.txt", value: body };
+    file = [{ name: "guilds.txt", data: body }];
     body = body.slice(0, 4000);
   }
 

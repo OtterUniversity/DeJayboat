@@ -8,7 +8,7 @@ export interface Command {
 
   name: string;
   aliases: string[];
-  default(context: Context);
+  default(context: Context): unknown;
 }
 
 const commands: Command[] = [];

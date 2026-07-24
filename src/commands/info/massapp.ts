@@ -1,5 +1,5 @@
 import { Context, snowflakeRegex } from "../../util";
-import { APIMessage, RESTGetAPIChannelWebhooksResult } from "discord-api-types/v9";
+import { APIMessage, RESTGetAPIChannelWebhooksResult } from "discord-api-types/v10";
 
 export const name = "massapp";
 export const aliases = ["appinfo", "ai"];
@@ -25,10 +25,10 @@ export default async function ({ message, args, api }: Context) {
       webhook.token,
       {
         username: "(real)",
-        avatarUrl: "https://cdn.discordapp.com/emojis/808831739614724186.png",
+        avatar_url: "https://cdn.discordapp.com/emojis/808831739614724186.png",
         content: `!!appinfo ${id} <@398690824721924107>`
       },
-      { wait: true }
+      true
     );
 
     await api.deleteMessage(proxy.channel_id, proxy.id);

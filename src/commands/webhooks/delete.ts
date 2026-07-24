@@ -1,5 +1,4 @@
 import { Context } from "../../util";
-import robert from "robert";
 
 export const name = "webhooks fuck";
 export const aliases = [
@@ -10,11 +9,11 @@ export const aliases = [
   "webhooks rm"
 ];
 
-export default function ({ message, args, api }: Context) {
+export default async function ({ message, args, api }: Context) {
   let url: URL;
 
   try {
-    url = new URL(args.join("/"), "https://discord.com/api/v9/webhooks");
+    url = new URL(args.join("/"), "https://discord.com/api/v10/webhooks");
   } catch {
     return api.createMessage(message.channel_id, { content: "Invalid URL" });
   }
@@ -29,17 +28,20 @@ export default function ({ message, args, api }: Context) {
   )
     return api.createMessage(message.channel_id, { content: "Invalid URL" });
 
-  robert
-    .get(url)
-    .send("json")
-    .then(async webhook => {
-      await api.createMessage(message.channel_id, {
-        content: "Webhook:\n```json\n" + JSON.stringify(webhook, null, 2) + "```",
-        allowedMentions: { parse: [] }
-      });
+  const match = url.pathname.match(/\/webhooks\/(\d{17,19})\/([\w-]+)/);
+  if (!match) return api.createMessage(message.channel_id, { content: "Invalid URL" });
+  const [, id, token] = match;
 
-      await api.deleteWebhookWithToken(webhook.id, webhook.token);
-      await api.createMessage(message.channel_id, { content: "Webhook deleted 👽" });
-    })
-    .catch(() => api.createMessage(message.channel_id, { content: "Invalid webhook" }));
+  try {
+    const webhook = await api.getWebhookWithToken(id, token);
+    await api.createMessage(message.channel_id, {
+      content: "Webhook:\n```json\n" + JSON.stringify(webhook, null, 2) + "```",
+      allowed_mentions: { parse: [] }
+    });
+
+    await api.deleteWebhookWithToken(id, token);
+    await api.createMessage(message.channel_id, { content: "Webhook deleted 👽" });
+  } catch {
+    api.createMessage(message.channel_id, { content: "Invalid webhook" });
+  }
 }

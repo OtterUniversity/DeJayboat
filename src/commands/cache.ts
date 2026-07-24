@@ -35,16 +35,15 @@ export default async function ({ message, args, api }: Context) {
   if (isBanned) {
     // if they're already banned, unban and ban
     await api.removeGuildBan(message.guild_id, userId);
-    await api.createGuildBan(message.guild_id, userId, {
-      deleteMessageDays: 0,
-      reason: ban.reason
-    });
+    await api.createGuildBan(message.guild_id, userId, { delete_message_seconds: 0 }, ban.reason ?? undefined);
   } else {
     // if they arent banned, ban and unban
-    await api.createGuildBan(message.guild_id, userId, {
-      deleteMessageDays: 0,
-      reason: ".cache by " + message.author.username + "#" + message.author.discriminator
-    });
+    await api.createGuildBan(
+      message.guild_id,
+      userId,
+      { delete_message_seconds: 0 },
+      ".cache by " + message.author.username + "#" + message.author.discriminator
+    );
     await api.removeGuildBan(message.guild_id, userId);
   }
 

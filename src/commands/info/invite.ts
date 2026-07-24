@@ -1,6 +1,6 @@
 import { Context, inviteRegex, color } from "../../util";
 import { guilds, updateGuilds } from "../../store";
-import { APIInvite } from "discord-api-types/v9";
+import { APIInvite } from "discord-api-types/v10";
 
 const VerificationLevels = ["None", "Low", "Medium", "High", "Very High"];
 
@@ -20,7 +20,7 @@ export default async function ({ message, args, api }: Context) {
 
   try {
     invite = await api.getInvite(code, {
-      withCounts: true
+      with_counts: true
     });
   } catch {
     return api.createMessage(message.channel_id, { content: "Invalid invite" });

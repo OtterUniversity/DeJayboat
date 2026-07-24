@@ -7,8 +7,8 @@ export const aliases = ["capybara", "cap"];
 export default async function ({ message, api }: Context) {
   const { id } = await api.createMessage(message.channel_id, {
     content: "🦧 Loading...",
-    allowedMentions: { parse: [] },
-    messageReference: { message_id: message.id, replied_user: true }
+    allowed_mentions: { parse: [], replied_user: true },
+    message_reference: { message_id: message.id }
   });
 
   const { data } = await robert.get("https://api.capy.lol/v1/capybara").query("json", true).send("json");

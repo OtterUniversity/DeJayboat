@@ -3,11 +3,13 @@
     "allowJs": true,
     "incremental": true,
     "target": "ES2021",
-    "module": "commonjs",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "outDir": "build",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "strict": true
   },
   "include": ["src/**/*.ts", "src/pretty-bytes", "config.ts"]
 }

@@ -6,38 +6,23 @@ export const color = parseInt("36393f", 16);
 export const inviteRegex = /discord(?:app)?\.(?:com|gg)\/(?:invite\/)?(?<code>[\w-]{1,25})/;
 
 import murmurhash from "murmurhash";
-import ottercord from "ottercord";
 
 import { experiment_api_token } from "./config";
-import { GatewayMessageCreateDispatchData } from "discord-api-types/v9";
-import { SpawnOptionsWithoutStdio, spawn } from "child_process";
-import { Gateway } from "detritus-client-socket";
+import { GatewayMessageCreateDispatchData } from "discord-api-types/v10";
 import robert from "robert";
 
+import type * as Api from "./rest";
+import type * as Ws from "./gateway";
 import { guilds } from "./store";
 
 export interface Client {
-  api?: ReturnType<typeof ottercord>;
-  ws?: Gateway.Socket;
+  api: typeof Api;
+  ws: typeof Ws;
 }
 
 export interface Context extends Client {
-  message?: GatewayMessageCreateDispatchData;
-  args?: string[];
-}
-
-export function exec(args: string[], options?: SpawnOptionsWithoutStdio) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(args.shift(), args, options);
-    let stdout = "";
-    let stderr = "";
-
-    child.stdout.on("data", data => (stdout += data));
-    child.stderr.on("data", data => (stderr += data));
-
-    child.on("error", reject);
-    child.on("close", code => resolve(code === 0 ? stdout : stderr));
-  });
+  message: GatewayMessageCreateDispatchData;
+  args: string[];
 }
 
 export function fetchExperiments(): Promise<Record<string, any>> {
@@ -50,7 +35,7 @@ export function fetchExperiments(): Promise<Record<string, any>> {
     .catch(() => ({}));
 }
 
-export async function collectExperiments(experiment, { args }: Context) {
+export async function collectExperiments(experiment: any, { args }: Pick<Context, "args">) {
   const treatments: Record<string, number> = {};
   let ids: string[] = [];
 
@@ -62,14 +47,14 @@ export async function collectExperiments(experiment, { args }: Context) {
     for await (const id of Object.keys(guilds)) {
       const range = murmurhash.v3(`${experiment.hash}:${id}`) % 1e4;
       let treatment = 0;
-      experiment.populations.forEach(a => {
+      experiment.populations.forEach((a: any) => {
         Object.keys(a.buckets).forEach(b => {
-          a.buckets[b].rollout.forEach(r => {
+          a.buckets[b].rollout.forEach((r: any) => {
             if (range >= r.min && range <= r.max) treatment = parseInt(b);
           });
         });
 
-        a.filters.forEach(f => {
+        a.filters.forEach((f: any) => {
           if (
             f.type == "guild_id_range" &&
             (BigInt(id) <= BigInt(f.min_id) || BigInt(id) >= BigInt(f.max_id))

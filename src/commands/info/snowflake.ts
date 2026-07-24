@@ -1,6 +1,6 @@
 import { Context, exactSnowflakeRegex } from "../../util";
 import { DiscordSnowflake } from "@sapphire/snowflake";
-import { APIMessage } from "discord-api-types/v9";
+import { APIMessage } from "discord-api-types/v10";
 import robert from "robert";
 
 const Snowflake = DiscordSnowflake;
@@ -34,7 +34,7 @@ async function resolve(snowflake: string, api: Context["api"]): Promise<string> 
 
   try {
     const application = await robert
-      .get("https://discord.com/api/v9/applications/" + snowflake + "/rpc")
+      .get("https://discord.com/api/v10/applications/" + snowflake + "/rpc")
       .send("json");
     return "Application (`" + application.name + "`)";
   } catch {}

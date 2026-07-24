@@ -1,7 +1,5 @@
 import { Context } from "../util";
-import robert from "robert";
-import { experiment_api_token } from "../config";
-import { APIMessage } from "discord-api-types/v9";
+import { APIMessage } from "discord-api-types/v10";
 
 export const open = true;
 export const name = "ping";
@@ -10,14 +8,14 @@ export default async function ({ message, api, ws }: Context) {
     content: "Pinging gateway..."
   });
 
-  const pings = [];
+  const pings: [string, number | string][] = [];
   function edit() {
     return api.editMessage(message.channel_id, id, {
       content: pings.map(([type, ping]) => "🕓 **" + ping + "ms** " + type).join("\n")
     });
   }
 
-  pings.push(["Gateway", await ws.ping()]);
+  pings.push(["Gateway", ws.getShardPing() ?? "?"]);
   await edit();
 
   const restStart = Date.now();

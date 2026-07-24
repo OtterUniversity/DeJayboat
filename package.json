@@ -4,7 +4,7 @@
   "description": "",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf build && tsc",
     "start": "npm run build && cd build && node ."
   },
   "keywords": [],
@@ -12,13 +12,12 @@
   "license": "ISC",
   "dependencies": {
     "@aero/sanitizer": "^1.3.2",
+    "@discordjs/rest": "^2.6.3",
+    "@discordjs/ws": "^2.0.4",
     "@sapphire/snowflake": "^3.5.3",
     "cheerio": "^1.0.0-rc.12",
-    "detritus-client-socket": "^0.8.3",
-    "discord-api-types": "^0.37.79",
-    "execa": "^8.0.1",
+    "discord-api-types": "^0.38.50",
     "murmurhash": "^2.0.1",
-    "ottercord": "^1.1.7",
     "pretty-bytes": "^7.0.1",
     "robert": "^2.6.5"
   },

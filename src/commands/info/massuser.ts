@@ -1,4 +1,5 @@
 import { Context, snowflakeRegex, color } from "../../util";
+import type { RawFile } from "../../rest";
 import robert from "robert";
 
 export const name = "massuser";
@@ -46,11 +47,11 @@ export default async function ({ message, args, api }: Context) {
 
     const percent = Math.round((completed / ids.size) * 10);
     if (!performance || completed === ids.size) {
-      let files = [];
+      let files: RawFile[] = [];
       if (completed === ids.size) {
-        files.push({ name: "users.json", value: JSON.stringify(arr, null, 2) });
+        files.push({ name: "users.json", data: JSON.stringify(arr, null, 2) });
         if (description.length > 4000) {
-          files.push({ name: "users.txt", value: description });
+          files.push({ name: "users.txt", data: description });
         }
       }
       if (description.length > 4000) {

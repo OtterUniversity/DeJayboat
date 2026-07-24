@@ -1,37 +1,28 @@
 import * as config from "./config";
 
-import {
-  UserFlags,
-  GatewayDispatchEvents,
-  GatewayMessageCreateDispatchData,
-  GatewayGuildMemberAddDispatchData,
-  MessageFlags,
-  GatewayMessageUpdateDispatchData
-} from "discord-api-types/v9";
-import { Gateway } from "detritus-client-socket";
+import { UserFlags, GatewayDispatchEvents, GatewayMessageCreateDispatchData } from "discord-api-types/v10";
+
+import * as api from "./rest";
+import * as ws from "./gateway";
 import { shutdown } from "./store.js";
 
 import commands, { Command } from "./commands";
 import articles from "./articles";
+import birthdays from "./birthdays";
 
 import sanitizer from "@aero/sanitizer";
-import ottercord from "ottercord";
-import robert from "robert";
-
-const ws = new Gateway.Socket(config.token);
-const api = ottercord(config.token);
 
 const tweetRegex = /(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/[^\/]+\/status\/(\d+)/g;
 const recentTweets = new Map<string, Set<GatewayMessageCreateDispatchData>>();
 
-ws.on("ready", () => {
+ws.manager.on(ws.WebSocketShardEvents.Ready, () => {
   if (shutdown.time && shutdown.channel && shutdown.message && Date.now() - shutdown.time < 60000)
     api.editMessage(shutdown.channel, shutdown.message, { content: "🟢 Online" });
 });
 
-ws.on("packet", async ({ t, d }: { t: string; d }) => {
-  if (t === GatewayDispatchEvents.MessageCreate && d.guild_id) {
-    const message: GatewayMessageCreateDispatchData = d;
+ws.manager.on(ws.WebSocketShardEvents.Dispatch, async payload => {
+  if (payload.t === GatewayDispatchEvents.MessageCreate && payload.d.guild_id) {
+    const message = payload.d;
     if (message.channel_id === config.datamining) {
       const [embed] = message.embeds;
       if (!embed?.description) return;
@@ -42,8 +33,8 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       let match;
       let images = [];
 
-      while ((match = mdImageRegex.exec(embed.description))) images.push(match.groups.image);
-      while ((match = htmlImageRegex.exec(embed.description))) images.push(match.groups.image);
+      while ((match = mdImageRegex.exec(embed.description))) images.push(match.groups!.image);
+      while ((match = htmlImageRegex.exec(embed.description))) images.push(match.groups!.image);
 
       if (images) {
         for (const image of images.slice(0, 10)) {
@@ -77,7 +68,7 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       sanitizer(message.content).toLowerCase().includes("spider-man")
     ) {
       const myResponse = await api.createMessage(message.channel_id, { content: "shut up" });
-      api.createReaction(message.channel_id, message.id, encodeURIComponent("🤓"));
+      api.createReaction(message.channel_id, message.id, "🤓");
       setTimeout(() => {
         api.deleteMessage(message.channel_id, message.id);
         api.deleteMessage(message.channel_id, myResponse.id);
@@ -104,8 +95,8 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
           content: `<:wires:1208617503232892938> repost detected${"!".repeat(
             Math.floor(Math.random() * 5 + 1)
           )} this was posted ${allSources}`,
-          allowedMentions: { parse: [] },
-          messageReference: { message_id: message.id, replied_user: true }
+          allowed_mentions: { parse: [], replied_user: true },
+          message_reference: { message_id: message.id }
         });
 
         // add the current message to the set so future reposts include it as a source
@@ -140,17 +131,11 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       api.createMessage(message.channel_id, { content: Math.random() > 0.5 ? "hi dejay" : "hi dj" });
     }
 
-    // if (message.author.id === "1418542549207093410") {
-    //   const messageUrl = `https://discord.com/channels/${message.guild_id}/${message.channel_id}/${message.id}`;
-    //   await api.createMessage(message.channel_id, { content: messageUrl });
-    //   setTimeout(() => api.deleteMessage(message.channel_id, message.id), 1000);
-    // }
-
     // #region Command Parsing
     if (!message.content.startsWith(config.prefix)) return;
 
     let next = message.content.slice(config.prefix.length).trim();
-    let command: Command;
+    let command: Command | undefined;
     for (const _command of commands) {
       if (next === _command.name || next.startsWith(_command.name + " ")) {
         next = next.slice(_command.name.length).trim();
@@ -169,7 +154,11 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     }
 
     if (!command) return;
-    if (!command.open && !config.owners.includes(message.author.id) && !message.member.roles.includes(config.role))
+    if (
+      !command.open &&
+      !config.owners.includes(message.author.id) &&
+      !message.member?.roles.includes(config.role)
+    )
       return api.createMessage(message.channel_id, { content: "👽 Missing permissions" });
 
     if (command.owner && !config.owners.includes(message.author.id))
@@ -180,15 +169,16 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
       await command.default({ message, args, api, ws });
     } catch (e) {
       console.log(e);
+      const err = e instanceof Error ? e : new Error(String(e));
       api.createMessage(message.channel_id, {
-        content: "<@296776625432035328> it broke\n```js\n" + e.message + "\n" + e.stack + "```"
+        content: "<@296776625432035328> it broke\n```js\n" + err.message + "\n" + err.stack + "```"
       });
     }
     // #endregion
   }
 
-  if (t === GatewayDispatchEvents.MessageUpdate && d.guild_id) {
-    const updated_message: GatewayMessageUpdateDispatchData = d;
+  if (payload.t === GatewayDispatchEvents.MessageUpdate && payload.d.guild_id) {
+    const updated_message = payload.d;
     if (updated_message.channel_id === "1094133074243108954") {
       const content = updated_message.content?.toLowerCase();
       if (content !== "5") {
@@ -197,14 +187,15 @@ ws.on("packet", async ({ t, d }: { t: string; d }) => {
     }
   }
 
-  if (t === GatewayDispatchEvents.GuildMemberAdd) {
-    const member: GatewayGuildMemberAddDispatchData = d;
+  if (payload.t === GatewayDispatchEvents.GuildMemberAdd) {
+    const member = payload.d;
     if (member.user.bot) return;
-    if ((member.user.flags & UserFlags.Staff) === UserFlags.Staff)
+    if (((member.user.flags ?? 0) & UserFlags.Staff) === UserFlags.Staff)
       api.addGuildMemberRole(member.guild_id, member.user.id, "919850136643969054");
   }
 });
 
-ws.connect("wss://gateway.discord.gg");
+ws.connect();
 
 articles(api);
+birthdays(api);

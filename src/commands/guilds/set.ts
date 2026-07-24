@@ -26,7 +26,7 @@ export default async function ({ message, args, api }: Context) {
         "**, please delete it with `.guilds delete " +
         id +
         "` first",
-      allowedMentions: { parse: [] }
+      allowed_mentions: { parse: [] }
     });
 
   guilds[id] = name;
@@ -34,6 +34,6 @@ export default async function ({ message, args, api }: Context) {
   updateGuilds();
   api.createMessage(message.channel_id, {
     content: "Set `" + id + "` to **" + name + "**",
-    allowedMentions: { parse: [] }
+    allowed_mentions: { parse: [] }
   });
 }
