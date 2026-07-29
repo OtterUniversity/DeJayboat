@@ -1,5 +1,6 @@
 config.ts
 node_modules/
 build/
+tsconfig.tsbuildinfo
 store/
 snippets

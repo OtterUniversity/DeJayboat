@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "incremental": true,
     "target": "ES2021",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
