@@ -1,10 +1,7 @@
-import { Context, fetchExperiments, snowflakeRegex, color, collectExperiments } from "../../util";
+import { Context, snowflakeRegex, color } from "../../util";
 import { guilds, updateGuilds } from "../../store";
 import { errorStatus, type RawFile } from "../../rest";
 import robert from "robert";
-
-import murmurhash from "murmurhash";
-import { load } from "cheerio";
 
 export const name = "massguild";
 export const aliases = ["guildinfo", "gi", "assguild"];
@@ -52,7 +49,6 @@ async function resolve(id: string, api: Context["api"]): Promise<string> {
 }
 
 export default async function ({ message, args, api }: Context) {
-  let treatments: Record<string, number> = {};
   let input = args.join(" ");
   let fast = args.includes("-f") || args.includes("--fast");
   if (!input) {
@@ -67,38 +63,7 @@ export default async function ({ message, args, api }: Context) {
 
   const ids = new Map<string, null | string>(input.match(snowflakeRegex)?.map(key => [key, null]));
 
-  if (!ids.size) {
-    let hashed = args[0];
-    if (hashed.includes("-")) hashed = murmurhash.v3(hashed).toString();
-
-    const experiments = await fetchExperiments();
-    let experiment = experiments[hashed];
-    if (!experiment) {
-      const { default: Fuse } = await import("fuse.js");
-      const engine = new Fuse(Object.values(experiments), {
-        keys: ["metadata.title"]
-      });
-
-      const search = engine.search(args.join(" "));
-      if (!search.length)
-        return api.createMessage(message.channel_id, {
-          content: "No experiment matched that query"
-        });
-
-      experiment = search[0].item;
-    }
-
-    await api.createMessage(message.channel_id, {
-      content: "Getting guilds in experiment **" + experiment.metadata.title + "**"
-    });
-
-    const experimentGuilds = await collectExperiments(experiment, { args });
-
-    if (!experimentGuilds.ids.length) return api.createMessage(message.channel_id, { content: "No IDs found" });
-
-    experimentGuilds.ids.forEach(id => ids.set(id, null));
-    treatments = experimentGuilds.treatments;
-  }
+  if (!ids.size) return api.createMessage(message.channel_id, { content: "No IDs found" });
 
   if (ids.size > 1000)
     return api.createMessage(message.channel_id, {
@@ -115,10 +80,7 @@ export default async function ({ message, args, api }: Context) {
 
     for (const [id, value] of ids.entries()) {
       if (value) completed++;
-      body += "`" + id + "` " + (value ?? "🔍 Loading...");
-      const treatment = treatments[id];
-      if (treatment) body += " (" + treatment + ")";
-      body += "\n";
+      body += "`" + id + "` " + (value ?? "🔍 Loading...") + "\n";
     }
 
     const percent = Math.round((completed / ids.size) * 10);
@@ -151,7 +113,7 @@ export default async function ({ message, args, api }: Context) {
           description: body,
           title: "🔍 Looking up **" + ids.size + "** guilds",
           footer: {
-            text: "* = From Preview | ^ = From Widget | % = From MEE6 | # = From Shitty Discord Scraper"
+            text: "* = From Preview | ^ = From Widget | % = From MEE6"
           }
         }
       ]
