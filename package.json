@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "build": "rm -rf build && tsc",
-    "start": "npm run build && cd build && node ."
+    "start": "npm run build && node ."
   },
   "keywords": [],
   "author": "",
