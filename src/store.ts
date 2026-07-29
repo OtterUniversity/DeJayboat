@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import { writeBirthdayICS } from "./birthdayIcs";
 
 if (!existsSync("store")) mkdirSync("store");
 if (!existsSync("store/guilds.json")) writeFileSync("store/guilds.json", JSON.stringify({}));
@@ -44,4 +45,5 @@ export function updateShutdown(data: Shutdown) {
 
 export function updateBirthdays() {
   writeFileSync("store/birthdays.json", JSON.stringify(birthdays));
+  writeBirthdayICS().catch(e => console.error("Failed to write birthday ics:", e));
 }

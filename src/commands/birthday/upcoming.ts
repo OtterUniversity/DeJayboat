@@ -1,5 +1,10 @@
-import { Context, color } from "../../util";
+import { Context, color, easternToday } from "../../util";
 import { birthdays } from "../../store";
+
+const monthNames = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
 
 export const open = true;
 export const name = "birthday upcoming";
@@ -12,22 +17,23 @@ export default async function ({ message, api }: Context) {
       allowed_mentions: { parse: [] }
     });
 
-  const now = new Date();
-  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const { year, month, day } = easternToday();
+  const today = Date.UTC(year, month - 1, day);
 
   const upcoming = entries
     .map(([id, entry]) => {
-      let next = Date.UTC(now.getUTCFullYear(), entry.month - 1, entry.day);
-      if (next < today) next = Date.UTC(now.getUTCFullYear() + 1, entry.month - 1, entry.day);
-      return { id, next };
+      let next = Date.UTC(year, entry.month - 1, entry.day);
+      if (next < today) next = Date.UTC(year + 1, entry.month - 1, entry.day);
+      return { id, entry, next };
     })
     .sort((a, b) => a.next - b.next)
     .slice(0, 3);
 
   const description = upcoming
-    .map(({ id, next }) => {
-      const ts = Math.floor(next / 1000);
-      return `<@${id}> — <t:${ts}:D> (<t:${ts}:R>)`;
+    .map(({ id, entry, next }) => {
+      const days = Math.round((next - today) / 86400000);
+      const when = days === 0 ? "today" : days === 1 ? "tomorrow" : `in ${days} days`;
+      return `<@${id}> — ${monthNames[entry.month - 1]} ${entry.day} (${when})`;
     })
     .join("\n");
 

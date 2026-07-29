@@ -53,7 +53,7 @@ export default async function ({ message, args, api }: Context) {
   updateBirthdays();
 
   api.createMessage(message.channel_id, {
-    content: `🎂 Set <@${target}>'s birthday to **${monthNames[month - 1]} ${day}**${year ? ` **${year}**` : ""}`,
+    content: `🎂 Set <@${target}>'s birthday to **${monthNames[month - 1]} ${day}${year ? `, ${year}` : ""}**`,
     allowed_mentions: { parse: [] }
   });
 }
