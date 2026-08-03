@@ -4,7 +4,7 @@ import { generateBirthdayICS } from "../../birthdayIcs";
 
 export const open = true;
 export const name = "birthday ics";
-export const aliases = ["birthday ical", "birthdays ics"];
+export const aliases = ["birthday ical", "birthdays ics", "birthdays ical"];
 export default async function ({ message, api }: Context) {
   if (!Object.keys(birthdays.users).length)
     return api.createMessage(message.channel_id, {

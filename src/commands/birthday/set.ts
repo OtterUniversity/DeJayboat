@@ -12,7 +12,7 @@ const monthNames = [
 
 export const open = true;
 export const name = "birthday set";
-export const aliases = ["birthday add"];
+export const aliases = ["birthday add", "birthdays set", "birthdays add"];
 export default async function ({ message, args, api }: Context) {
   let target = message.author.id;
 

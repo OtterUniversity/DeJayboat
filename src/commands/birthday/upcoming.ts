@@ -8,7 +8,7 @@ const monthNames = [
 
 export const open = true;
 export const name = "birthday upcoming";
-export const aliases = ["birthday next", "birthday list"];
+export const aliases = ["birthday next", "birthday list", "birthdays upcoming", "birthdays next", "birthdays list"];
 export default async function ({ message, api }: Context) {
   const entries = Object.entries(birthdays.users);
   if (!entries.length)
