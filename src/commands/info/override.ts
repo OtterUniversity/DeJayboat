@@ -63,13 +63,14 @@ export default function ({ message, args, api }: Context) {
       value: "`" + target.type + "` " + target.id
     }));
 
+    const expiresAt = new Date(data.expiresAt);
     const dataStr = JSON.stringify(data, null, 2)
     api.createMessage(message.channel_id, {
       content: dataStr.length < 1000 ? "```json\n" + JSON.stringify(data, null, 2) + "```" : "",
       embeds: [
         {
           color,
-          timestamp: data.expiresAt,
+          timestamp: isNaN(expiresAt.getTime()) ? undefined : expiresAt.toISOString(),
           footer: {
             text: "Expires"
           },
